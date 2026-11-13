@@ -1,0 +1,16 @@
+[Unit]
+Description=Salesforce Support Dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__USER__
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=__APP_DIR__/.env
+ExecStart=__APP_DIR__/venv/bin/python -m uvicorn app:app --host 0.0.0.0 --port 4173
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

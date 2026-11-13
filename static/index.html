@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Owner by End Time</title>
+<style>
+  :root{--bg:#17181c;--card:#212227;--line:#33353c;--txt:#eceef1;--mut:#9a9da6;--acc:#8aa9ff;
+        --red:#4a1c2b;--redt:#ff9db0;--amb:#6a5216;--ambt:#ffd98a;--grn:#1d4a3d;--grnt:#8be8c5}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.4 -apple-system,Inter,"Segoe UI",sans-serif;padding:22px 26px 60px}
+  h1{font-size:19px;margin:0}h1 small{color:var(--mut);font-weight:400;font-size:14px;margin-left:6px}
+  button,input,select{font:inherit;color:var(--txt);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+  button{cursor:pointer}button:hover,select:hover{border-color:var(--acc)}
+  input[type=number]{width:54px}
+  .top{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+  .grow{flex:1}
+  .tag{background:#3a2a10;color:#ffc46b;border-radius:6px;padding:2px 8px;font-size:11px;margin-left:8px}
+  .win{color:var(--mut);font-size:12px;margin-bottom:12px}
+  .tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px;color:var(--mut);font-size:12px}
+  .tools label{display:flex;gap:6px;align-items:center}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{border:0;border-radius:0;background:transparent;padding:6px 12px;color:var(--mut)}
+  .seg button.on{background:var(--acc);color:#0d1630;font-weight:600}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .chip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;cursor:pointer;min-width:215px;user-select:none}
+  .chip:hover{border-color:var(--acc)}.chip.on{border-color:var(--acc);background:#262c3f}
+  .chip .row{display:flex;align-items:baseline;gap:8px}
+  .chip .row b{font-size:12px;color:var(--mut)}.chip .row .v{font-size:20px;font-weight:700}
+  .chip .pct{margin-left:auto;font-size:12px;color:var(--acc);font-weight:700}
+  .chip .top2{font-size:12px;color:var(--mut);margin-top:6px;line-height:1.5}
+  .pbar{height:4px;background:#2c2e35;border-radius:3px;margin-top:8px;overflow:hidden}.pbar i{display:block;height:100%;background:var(--acc)}
+  .star{color:#ffcf4a;margin-left:5px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px}
+  .lbl{color:var(--mut);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+  .big{font-size:36px;font-weight:700;margin:4px 0 6px}.big.sm{font-size:26px;margin-top:10px}
+  .sub{color:var(--mut);font-size:12px}
+  .bar2{height:6px;border-radius:4px;background:#2c2e35;margin-top:10px;overflow:hidden;display:flex}.bar2 i{display:block;height:100%}
+  .card h2{font-size:14px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+  .card h2 .sp{flex:1}.card h2 button{font-size:11px;padding:3px 9px;color:var(--mut)}
+  .hint{color:var(--mut);font-size:12px;margin:0 0 12px}
+  .sec{margin-bottom:18px}
+  .wrap{overflow:auto;max-width:100%}
+  table{border-collapse:collapse;width:100%}
+  th{color:var(--mut);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th.s{cursor:pointer}th.s:hover{color:var(--txt)}th.sel{color:var(--acc)}
+  td{padding:9px 12px;text-align:right;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  tr.tot td{border-top:2px solid var(--line);font-weight:700}
+  .b{font-weight:700}
+  #weekly tbody tr{cursor:pointer}#weekly tbody tr:hover{background:#2a2c33}
+  #weekly tbody tr.on{background:#262c3f;outline:1px solid var(--acc)}
+  .name{cursor:pointer}.name:hover{color:var(--acc);text-decoration:underline}
+  .pod{font-size:10px;border:1px solid var(--line);border-radius:5px;padding:0 5px;margin-left:7px;color:var(--mut)}
+  .nis{font-size:10px;background:#3a2a10;color:#ffc46b;border-radius:5px;padding:1px 6px;margin-left:7px}
+  #eng td.g{background:var(--grn)}#eng td.r{background:var(--red)}
+  #eng td span{color:var(--mut)}#eng td.g span,#eng td.r span{color:#cfd3da}
+  #eng tbody tr:hover td{filter:brightness(1.25)}
+  tr.ph td{background:#262833;font-weight:700;cursor:pointer;border-top:1px solid var(--line)}
+  tr.ph:hover td{background:#2d3040}tr.ph .sub{font-weight:400}
+  #heat{width:auto;min-width:100%}
+  #heat th,#heat td{padding:0;text-align:center}
+  #heat th.nm,#heat td.nm{position:sticky;left:0;background:var(--card);z-index:2;text-align:left;padding:0 14px 0 0;min-width:210px;white-space:nowrap}
+  #heat td.c{min-width:46px;height:32px;font-size:13px;border:1px solid var(--card)}
+  #heat td.c.r{background:var(--red);color:var(--redt)}#heat td.c.a{background:var(--amb);color:var(--ambt)}#heat td.c.g{background:var(--grn);color:var(--grnt)}
+  #heat td.c.hl,#heat th.hl{outline:1px solid var(--acc);outline-offset:-1px}
+  #heat tr:hover td.nm{color:var(--acc)}
+  #heat th{padding:8px 4px;font-size:11px;font-weight:600}#heat th.we{color:#c58b5a}
+  #heat td.x,#heat th.x{padding:0 10px;font-weight:700;min-width:54px;border-left:1px solid var(--line)}
+  #heat tr.ph td{padding:9px 4px}#heat tr.ph td.nm{background:#262833;padding:9px 14px}#heat tr.ph td.x{padding:0 10px}
+  #heat tr.tot td{border-top:2px solid var(--line);font-weight:700}
+  .legend{display:flex;gap:14px;align-items:center;color:var(--mut);font-size:12px;margin-bottom:12px;flex-wrap:wrap}
+  .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
+  #tip{position:fixed;pointer-events:none;background:#0f1013;border:1px solid var(--acc);border-radius:8px;padding:8px 11px;font-size:12px;z-index:50;display:none;box-shadow:0 6px 20px #0008}
+  #tip b{display:block;margin-bottom:3px}
+  .err{color:#ff8a8a;padding:4px 0}
+  .badge{display:inline-block;border-radius:5px;padding:1px 8px;font-size:11px;font-weight:700}
+  .pass{background:var(--grn);color:var(--grnt)}.fail{background:var(--red);color:var(--redt)}
+  #checks td,#rost td{text-align:left;white-space:normal}
+  details summary{cursor:pointer;color:var(--acc);margin:8px 0}
+  .notes li{margin:5px 0;color:var(--mut)}.notes b{color:var(--txt)}
+  #modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+  #modal .box{background:var(--card);border:1px solid var(--line);border-radius:16px;width:min(900px,100%);max-height:90vh;overflow:auto;padding:22px 26px}
+  .mh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.mh h3{margin:0;font-size:18px}
+  .stats{display:flex;gap:26px;margin:14px 0;flex-wrap:wrap}.stats div b{display:block;font-size:22px}
+  .bars{display:flex;align-items:flex-end;gap:3px;height:130px;margin:10px 0 4px;border-bottom:1px solid var(--line)}
+  .bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;min-width:6px}
+  .bars i{display:block;width:100%}.bars .inc{background:var(--acc)}.bars .srq{background:#e0a458}
+  .allc{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:26px;margin-bottom:14px;cursor:pointer}
+  .allc.on{border-color:var(--acc);background:#262c3f}
+  .allc .big{font-size:44px}
+  .ins{list-style:none;margin:0;padding:0;columns:2;column-gap:28px}
+  .ins li{margin:0 0 9px;color:var(--mut);break-inside:avoid;font-size:13px}.ins b{color:var(--txt)}
+  .up{color:var(--grnt);font-weight:700}.dn{color:var(--redt);font-weight:700}
+  @media(max-width:900px){.allc{grid-template-columns:1fr}.ins{columns:1}}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>Section 1 · Owner by End Time <small id="podLbl">— All</small><span id="mock"></span></h1>
+  <span class="grow"></span>
+  <label class="sub">From <input type="date" id="start"></label>
+  <label class="sub">To <input type="date" id="end"></label>
+  <button id="apply">Apply</button>
+  <button id="refresh">&#8635; Refresh</button>
+  <button id="reset" title="Back to the rolling window (today-37 .. today-7)">Rolling window</button>
+  <span class="sub" id="meta"></span>
+</div>
+<div class="win" id="win"></div>
+
+<div class="tools">
+  <label>Week <select id="weekSel"><option value="">All weeks</option></select></label>
+  <span>Metric</span>
+  <div class="seg" id="metric"><button data-m="all" class="on">All</button><button data-m="inc">Incidents</button><button data-m="sr">SR/Query</button></div>
+  <input id="q" placeholder="Search engineer…" style="min-width:170px">
+  <label><input type="checkbox" id="grp" checked> Group by POD</label>
+  <label><input type="checkbox" id="wknd" checked> Show weekends</label>
+  
+</div>
+<div id="err" class="err"></div>
+
+<div class="chips" id="chips"></div>
+
+<div class="card sec">
+  <h2>Weekly summary <span class="sp"></span><button data-exp="weekly">Export CSV</button></h2>
+  <p class="hint">Roster-owned tickets for the selected PODs. Click a week to filter the whole page to it (click again to clear).</p>
+  <div class="wrap"><table id="weekly"></table></div>
+</div>
+
+<div class="card sec">
+  <h2>Per-engineer weekly (count / avg per working day) <span class="sp"></span><button data-exp="eng">Export CSV</button></h2>
+  <p class="hint">Grouped by POD with subtotals (click a POD row to collapse). ★ = top resolver in the POD. Each engineer's highest week is green, lowest is red. Click headers to sort, click a name for details.</p>
+  <div class="wrap"><table id="eng"></table></div>
+</div>
+
+<div class="card sec">
+  <h2>Combined heatmap — engineers × dates <span class="sp"></span><button data-exp="heat">Export CSV</button></h2>
+  <div class="legend"><span><i class="sw" style="background:var(--red)"></i><span id="lgR"></span></span>
+    <span><i class="sw" style="background:var(--amb)"></i><span id="lgA"></span></span>
+    <span><i class="sw" style="background:var(--grn)"></i><span id="lgG"></span></span>
+    <span>Cell = Incident + SR/Query; hover shows the split. Click a date header to sort by that day.</span></div>
+  <div class="wrap"><table id="heat"></table></div>
+</div>
+
+<div id="more" style="display:none">
+<div class="card sec">
+  <h2>Validation</h2>
+  <div class="wrap"><table id="checks"></table></div>
+  <details><summary id="rostSum">Roster</summary><div class="wrap"><table id="rost"></table></div><p class="sub" id="rostNote"></p></details>
+</div>
+
+<div class="card sec">
+  <h2>Notes &amp; rules</h2>
+  <ul class="notes">
+    <li><b>Counting rule:</b> Status = Solved, Category = Software (Hardware excluded), Type ≠ Alert (Alerts excluded). Each case counts once.</li>
+    <li><b>Incident vs SR/Query:</b> Incidents are Type = Incident; every other non-Alert type is SR/Query.</li>
+    <li><b>Window &amp; dates:</b> End Time of Incident only (not ClosedDate / LastModifiedDate / CaseHistory), converted to IST then bucketed by day and week (Sun–Sat). Window = today−37 to today−7, extended back to the Sunday so the first week is complete; the last week is tagged Partial.</li>
+    <li><b>Ownership:</b> a ticket is credited to its current owner as of today. Non-roster owners are counted separately (all-owner total, non-roster share, top owners).</li>
+    <li><b>Averages:</b> count ÷ Monday–Friday days in the period; weekend tickets still count in totals. Individual leaves are not adjusted (Weekly Off is blank).</li>
+    <li><b>Roster:</b> fixed email lists (52 engineers); POD Name in Salesforce is not used. Engineers not found in Salesforce show zeros with “not in Salesforce yet”.</li>
+  </ul>
+</div>
+
+</div>
+<div style="text-align:center;margin-top:8px"><button id="moreBtn" style="color:var(--mut);font-size:12px">Show validation &amp; notes</button></div>
+<div id="tip"></div>
+<div id="modal"><div class="box" id="mbox"></div></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const n=x=>(x??0).toLocaleString();
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const D=s=>new Date(s+"T00:00:00Z"),iso=d=>d.toISOString().slice(0,10);
+const addD=(d,k)=>new Date(d.getTime()+k*864e5);
+const fmtMD=s=>{const d=D(s);return MON[d.getUTCMonth()]+" "+d.getUTCDate()};
+const S={data:null,pods:new Set(),metric:"all",q:"",sort:{k:"tot",d:-1},week:null,wknd:true,custom:false,group:true,col:new Set(),low:3,high:5};
+let M=null;
+
+async function load(force,rolling){
+  $("err").textContent="";
+  const q=new URLSearchParams();
+  if(!rolling){if($("start").value)q.set("start",$("start").value);if($("end").value)q.set("end",$("end").value)}
+  if(force)q.set("refresh","true");
+  $("meta").textContent="Loading from Salesforce… (first load runs ~20 queries)";
+  try{
+    const r=await fetch("/api/summary?"+q,{cache:"no-store"});
+    if(!r.ok)throw new Error((await r.text()).slice(0,400));
+    S.data=await r.json();
+    const W=S.data.window;$("start").value=W.start;$("end").value=W.end;
+    $("mock").innerHTML=S.data.mock?'<span class="tag">MOCK DATA</span>':"";
+    $("meta").textContent="Last refreshed "+S.data.generated_at.replace("T"," ");
+    $("win").textContent=`Window ${fmtMD(W.start)} – ${fmtMD(W.end)} (IST whole days)`;
+    render();
+  }catch(e){$("err").textContent="Error: "+e.message;$("meta").textContent=""}
+}
+
+function buildWeeks(dates){
+  const map=new Map();
+  dates.forEach(ds=>{const d=D(ds),ws=iso(addD(d,-d.getUTCDay()));if(!map.has(ws))map.set(ws,[]);map.get(ws).push(ds)});
+  return [...map].map(([ws,ds])=>{const we=iso(addD(D(ws),6));
+    return{ws,we,dates:ds,from:ds[0],to:ds[ds.length-1],partial:ds[0]!==ws||ds[ds.length-1]!==we,
+      wd:ds.filter(x=>{const g=D(x).getUTCDay();return g>0&&g<6}).length}});
+}
+const val=c=>!c?0:S.metric==="inc"?c[0]:S.metric==="sr"?c[1]:c[0]+c[1];
+function sk(e,k){
+  if(k==="name")return e.name.toLowerCase();if(k==="tot")return e.tot;if(k==="avg")return e.avg;if(k==="inc")return e.inc;if(k==="sr")return e.sr;
+  if(k[0]==="w")return e.wk[+k.slice(1)];if(k.startsWith("d:"))return e.dv[k.slice(2)]??0;return 0}
+function model(){
+  const d=S.data,W=d.window,dates=[];
+  for(let x=D(W.start);x<=D(W.end);x=addD(x,1))dates.push(iso(x));
+  const weeks=buildWeeks(dates);
+  if(S.week!=null&&!weeks[S.week])S.week=null;
+  const wdTotal=weeks.reduce((a,w)=>a+w.wd,0)||1;
+  const scope=S.week!=null?weeks[S.week].dates:dates;
+  const wdScope=(S.week!=null?weeks[S.week].wd:wdTotal)||1;
+  const calc=e=>{const dv={},wk=weeks.map(()=>0);let inc=0,sr=0;
+    dates.forEach(x=>dv[x]=val(e.days[x]));
+    weeks.forEach((w,i)=>w.dates.forEach(x=>wk[i]+=dv[x]));
+    const tot=scope.reduce((a,x)=>a+dv[x],0);
+    scope.forEach(x=>{const c=e.days[x];if(c){inc+=c[0];sr+=c[1]}});
+    return{...e,dv,wk,inc,sr,tot,avg:tot/wdScope}};
+  const every=d.engineers.map(calc);
+  const all=every.filter(e=>!S.pods.size||S.pods.has(e.pod));
+  const engs=all.filter(e=>!S.q||e.name.toLowerCase().includes(S.q)||e.email.toLowerCase().includes(S.q));
+  const {k,d:dir}=S.sort;
+  engs.sort((a,b)=>{const x=sk(a,k),y=sk(b,k);const c=(x>y)-(x<y);return c?c*dir:(b.tot-a.tot)||a.name.localeCompare(b.name)});
+  const full=e=>scope.reduce((a,x)=>{const c=e.days[x];return a+(c?c[0]+c[1]:0)},0);
+  const af=d.engineers.map(e=>({id:e.id,name:e.name,pod:e.pod,t:full(e)}));
+  const grand=af.reduce((a,e)=>a+e.t,0);
+  const pods=d.pods.map(p=>{const m=af.filter(e=>e.pod===p),t=m.reduce((a,e)=>a+e.t,0),mx=Math.max(0,...m.map(e=>e.t));
+    return{p,eng:m.length,t,share:grand?t/grand*100:0,avg:t/wdScope,mx,
+      top:mx>0?[m.filter(e=>e.t===mx).sort((a,b)=>a.name.localeCompare(b.name))[0]]:[]}});
+  const star=new Set();pods.forEach(x=>x.top.forEach(e=>star.add(e.id)));
+  return{dates,weeks,wdTotal,wdScope,all,engs,scope,pods,star,grand,every};
+}
+
+function render(){
+  if(!S.data)return;M=model();fillWeekSel();
+  renderChips();renderWeekly();renderEng();renderHeat();renderValidation();
+  $("podLbl").textContent="— "+(S.pods.size?[...S.pods].sort().join(", "):"All")+(S.week!=null?" · "+weekLabel(M.weeks[S.week]):"");
+}
+function weekLabel(w){return fmtMD(w.from)+" – "+fmtMD(w.to)+(w.partial?" (Partial)":"")}
+function fillWeekSel(){
+  const sel=$("weekSel"),want=["All weeks",...M.weeks.map(weekLabel)];
+  if([...sel.options].map(o=>o.text).join("|")!==want.join("|"))
+    sel.innerHTML=want.map((t,i)=>`<option value="${i?i-1:""}">${esc(t)}</option>`).join("");
+  sel.value=S.week==null?"":String(S.week);
+}
+function renderChips(){
+  const {pods,grand,wdScope}=M,ne=S.data.engineers.length;
+  const all=`<div class="chip ${S.pods.size?"":"on"}" data-p=""><div class="row"><b>All PODs</b><span class="v">${n(grand)}</span><span class="pct">100%</span></div>
+    <div class="pbar"><i style="width:100%"></i></div><div class="top2">${ne} eng · ${(grand/wdScope).toFixed(1)}/day</div></div>`;
+  $("chips").innerHTML=all+pods.map(x=>`<div class="chip ${S.pods.has(x.p)?"on":""}" data-p="${esc(x.p)}">
+    <div class="row"><b>${esc(x.p)}</b><span class="v">${n(x.t)}</span><span class="pct">${x.share.toFixed(1)}%</span></div>
+    <div class="pbar"><i style="width:${x.share}%"></i></div>
+    <div class="top2">${x.eng} eng · ${x.avg.toFixed(1)}/day${x.top.length?` · <span class="star" style="margin:0">★</span> ${esc(x.top[0].name)} (${x.mx})`:""}</div></div>`).join("");
+}
+function renderWeekly(){
+  const {all,weeks,pods}=M;let ti=0,ts=0,td=0;
+  const pc=S.pods.size?pods.filter(x=>S.pods.has(x.p)).map(x=>x.p):pods.map(x=>x.p);
+  const rows=weeks.map(w=>{let i=0,s=0;const pp={};pc.forEach(p=>pp[p]=0);
+    all.forEach(e=>w.dates.forEach(x=>{const c=e.days[x];if(c){i+=c[0];s+=c[1];pp[e.pod]=(pp[e.pod]||0)+c[0]+c[1]}}));return{w,i,s,pp}});
+  const pt={};pc.forEach(p=>pt[p]=0);
+  rows.forEach(r=>{ti+=r.i;ts+=r.s;td+=r.w.wd;pc.forEach(p=>pt[p]+=r.pp[p]||0)});
+  $("weekly").innerHTML=`<thead><tr><th>Week</th><th>Days</th><th>Incidents</th><th>SR/Query</th><th>Total</th><th>Avg/working day</th>${pc.map((p,i)=>`<th style="${i?"":"border-left:1px solid var(--line)"}">${esc(p)}</th>`).join("")}</tr></thead><tbody>`+
+   rows.map((r,idx)=>`<tr data-w="${idx}" class="${S.week===idx?"on":""}"><td>${esc(weekLabel(r.w))}</td><td>${r.w.wd}</td><td>${n(r.i)}</td><td>${n(r.s)}</td>
+     <td class="b">${n(r.i+r.s)}</td><td>${r.w.wd?((r.i+r.s)/r.w.wd).toFixed(1):"0.0"}</td>${pc.map(p=>`<td>${n(r.pp[p])}</td>`).join("")}</tr>`).join("")+
+   `</tbody><tfoot><tr class="tot"><td>Total</td><td>${td}</td><td>${n(ti)}</td><td>${n(ts)}</td><td>${n(ti+ts)}</td><td>${td?((ti+ts)/td).toFixed(1):"0.0"}</td>${pc.map(p=>`<td>${n(pt[p])}</td>`).join("")}</tr></tfoot>`;
+}
+const th=(k,label,cls="")=>`<th class="s ${cls} ${S.sort.k===k?"sel":""}" data-k="${k}">${label}${S.sort.k===k?(S.sort.d<0?" ▾":" ▴"):""}</th>`;
+function groups(){
+  if(!S.group)return[{pod:null,list:M.engs}];
+  return [...new Set(M.engs.map(e=>e.pod))].sort().map(p=>({pod:p,list:M.engs.filter(e=>e.pod===p)}));
+}
+const caret=p=>S.col.has(p)?"▸":"▾";
+const nameCell=(e,showPod)=>`<span class="name" data-e="${esc(e.id)}">${esc(e.name)}</span>${M.star.has(e.id)?'<span class="star" title="Top resolver in '+esc(e.pod)+'">★</span>':""}${e.status==="not_in_salesforce"?'<span class="nis">not in Salesforce yet</span>':""}${showPod?`<span class="pod">${esc(e.pod)}</span>`:""}`;
+function renderEng(){
+  const {weeks,wdScope}=M,idx=weeks.map((_,i)=>i).filter(i=>S.week==null||i===S.week);
+  const head=`<thead><tr>${th("name","Engineer")}${idx.map(i=>th("w"+i,esc(weekLabel(weeks[i])))).join("")}${th("tot","Total")}${th("avg","Avg/day")}</tr></thead>`;
+  const row=e=>{const vs=idx.map(i=>e.wk[i]),mx=Math.max(...vs),mn=Math.min(...vs);
+    return`<tr><td>${nameCell(e,!S.group)}</td>`+idx.map(i=>{const v=e.wk[i],w=weeks[i],c=mx===mn?"":v===mx?"g":v===mn?"r":"";
+      return`<td class="${c}">${v} <span>/ ${(w.wd?v/w.wd:0).toFixed(1)}</span></td>`}).join("")+`<td class="b">${n(e.tot)}</td><td>${e.avg.toFixed(1)}</td></tr>`};
+  let body="";
+  groups().forEach(g=>{
+    if(g.pod){const x=M.pods.find(y=>y.p===g.pod),sums=idx.map(i=>g.list.reduce((a,e)=>a+e.wk[i],0)),tt=g.list.reduce((a,e)=>a+e.tot,0);
+      body+=`<tr class="ph" data-pod="${esc(g.pod)}"><td>${caret(g.pod)} ${esc(g.pod)}</td>${sums.map((v,j)=>`<td>${v} <span class="sub">/ ${(weeks[idx[j]].wd?v/weeks[idx[j]].wd:0).toFixed(1)}</span></td>`).join("")}<td>${n(tt)}</td><td>${(tt/wdScope).toFixed(1)}</td></tr>`}
+    if(!g.pod||!S.col.has(g.pod))g.list.forEach(e=>body+=row(e));
+  });
+  $("eng").innerHTML=head+`<tbody>${body||`<tr><td colspan="${idx.length+3}" class="sub">No engineers match.</td></tr>`}</tbody>`;
+}
+function renderHeat(){
+  const {engs,dates,weeks,wdScope}=M;
+  let cols=S.week!=null?weeks[S.week].dates:dates;
+  if(!S.wknd)cols=cols.filter(x=>{const g=D(x).getUTCDay();return g>0&&g<6});
+  const L=S.low,H=S.high;
+  $("lgR").textContent=`< ${L} (incl. 0)`;$("lgA").textContent=`${L}–${H}`;$("lgG").textContent=`> ${H}`;
+  const cls=v=>v<L?"r":v>H?"g":"a";
+  const sumCols=list=>cols.map(x=>list.reduce((a,e)=>a+(e.dv[x]||0),0));
+  const head=`<thead><tr><th class="nm s ${S.sort.k==="name"?"sel":""}" data-k="name" style="padding:8px 14px">Engineer</th>`+
+   cols.map((x,i)=>{const g=D(x).getUTCDay();return`<th class="s ${g%6===0?"we":""} ${S.sort.k==="d:"+x?"sel":""}" data-k="d:${x}" data-c="${i}" title="${DOW[g]} ${x}">${x.slice(5)}</th>`}).join("")+
+   `<th class="x s" data-k="inc">Inc</th><th class="x s" data-k="sr">SR</th><th class="x s" data-k="tot">Total</th><th class="x s" data-k="avg">Avg/day</th></tr></thead>`;
+  const row=e=>`<tr><td class="nm">${nameCell(e,!S.group)}</td>`+cols.map((x,i)=>{const v=e.dv[x]||0,c=e.days[x]||[0,0];
+    return`<td class="c ${cls(v)}" data-c="${i}" data-e="${esc(e.id)}" data-d="${x}" data-i="${c[0]}" data-s="${c[1]}">${v}</td>`}).join("")+
+    `<td class="x">${e.inc}</td><td class="x">${e.sr}</td><td class="x b">${e.inc+e.sr}</td><td class="x">${((e.inc+e.sr)/wdScope).toFixed(1)}</td></tr>`;
+  let body="";
+  groups().forEach(g=>{
+    if(g.pod){const x=M.pods.find(y=>y.p===g.pod),sc=sumCols(g.list),gi=g.list.reduce((a,e)=>a+e.inc,0),gs=g.list.reduce((a,e)=>a+e.sr,0);
+      body+=`<tr class="ph" data-pod="${esc(g.pod)}"><td class="nm">${caret(g.pod)} ${esc(g.pod)}</td>${sc.map(v=>`<td>${v}</td>`).join("")}<td class="x">${gi}</td><td class="x">${gs}</td><td class="x">${gi+gs}</td><td class="x">${((gi+gs)/wdScope).toFixed(1)}</td></tr>`}
+    if(!g.pod||!S.col.has(g.pod))g.list.forEach(e=>body+=row(e));
+  });
+  let ti=0,ts=0;engs.forEach(e=>{ti+=e.inc;ts+=e.sr});
+  $("heat").innerHTML=head+`<tbody>${body}</tbody><tfoot><tr class="tot"><td class="nm" style="padding:10px 14px">TOTAL</td>`+sumCols(engs).map(v=>`<td>${v}</td>`).join("")+
+   `<td class="x">${ti}</td><td class="x">${ts}</td><td class="x">${ti+ts}</td><td class="x">${((ti+ts)/wdScope).toFixed(1)}</td></tr></tfoot>`;
+}
+function renderValidation(){
+  const d=S.data;
+  $("checks").innerHTML=`<thead><tr><th>Check</th><th>Result</th><th>Detail</th></tr></thead><tbody>`+
+    d.checks.map(c=>`<tr><td>${esc(c.name)}</td><td><span class="badge ${c.ok?"pass":"fail"}">${c.ok?"PASS":"FAIL"}</span></td><td class="sub">${esc(c.detail)}</td></tr>`).join("")+
+    `<tr><td>Cross-check (no OwnerId filter)</td><td></td><td class="sub">All-owner ${n(d.all_owner_total)} = roster ${n(d.roster_total)} + non-roster ${n(d.non_roster_total)}</td></tr></tbody>`;
+  const r=d.roster_report;
+  $("rostSum").textContent=`Roster (${r.total} engineers · ${r.matched} matched in Salesforce · ${r.unmatched.length} unmatched · ${r.multiple.length} with several matches)`;
+  $("rost").innerHTML=`<thead><tr><th>Name</th><th>Email</th><th>POD</th><th>Status</th></tr></thead><tbody>`+
+    r.roster.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.email)}</td><td>${esc(x.pod)}</td><td>${x.status==="ok"?"matched":x.status==="not_in_salesforce"?'<span class="nis">not in Salesforce yet</span>':"multiple matches"}</td></tr>`).join("")+`</tbody>`;
+  $("rostNote").textContent=r.action;
+}
+
+function openEng(id){
+  const e=M.every.find(x=>x.id===id);if(!e)return;
+  const days=M.dates,mx=Math.max(1,...days.map(x=>{const c=e.days[x];return c?c[0]+c[1]:0}));
+  let inc=0,sr=0;days.forEach(x=>{const c=e.days[x];if(c){inc+=c[0];sr+=c[1]}});
+  const best=days.reduce((b,x)=>{const c=e.days[x];const v=c?c[0]+c[1]:0;return v>b[1]?[x,v]:b},["",0]);
+  $("mbox").innerHTML=`<div class="mh"><div><h3>${esc(e.name)} <span class="pod">${esc(e.pod)}</span>${e.status==="not_in_salesforce"?'<span class="nis">not in Salesforce yet</span>':""}</h3><div class="sub">${esc(e.email)}</div></div><button id="mclose">Close ✕</button></div>
+   <div class="stats"><div><b>${inc+sr}</b><span class="sub">Total</span></div><div><b>${inc}</b><span class="sub">Incidents</span></div><div><b>${sr}</b><span class="sub">SR/Query</span></div>
+   <div><b>${((inc+sr)/M.wdTotal).toFixed(1)}</b><span class="sub">Avg / working day</span></div><div><b>${best[1]}</b><span class="sub">Best day ${best[0]?fmtMD(best[0]):"–"}</span></div></div>
+   <div class="sub">Daily tickets (<span style="color:var(--acc)">■</span> Incident <span style="color:#e0a458">■</span> SR/Query)</div>
+   <div class="bars">${days.map(x=>{const c=e.days[x]||[0,0];return`<div title="${x} · ${c[0]} incident, ${c[1]} SR/Query"><i class="srq" style="height:${c[1]/mx*120}px"></i><i class="inc" style="height:${c[0]/mx*120}px"></i></div>`}).join("")}</div>
+   <div class="sub" style="display:flex;justify-content:space-between"><span>${fmtMD(days[0])}</span><span>${fmtMD(days[days.length-1])}</span></div>
+   <table style="margin-top:14px"><thead><tr><th>Week</th><th>Days</th><th>Incidents</th><th>SR/Query</th><th>Total</th><th>Avg/day</th></tr></thead><tbody>`+
+   M.weeks.map(w=>{let i=0,s=0;w.dates.forEach(x=>{const c=e.days[x];if(c){i+=c[0];s+=c[1]}});return`<tr><td>${esc(weekLabel(w))}</td><td>${w.wd}</td><td>${i}</td><td>${s}</td><td class="b">${i+s}</td><td>${w.wd?((i+s)/w.wd).toFixed(1):"0.0"}</td></tr>`}).join("")+`</tbody></table>`;
+  $("modal").style.display="flex";
+}
+function exportCsv(id){
+  const rows=[...$(id).querySelectorAll("tr")].map(tr=>[...tr.children].map(c=>'"'+c.textContent.replace(/\s+/g," ").trim().replace(/"/g,'""')+'"').join(","));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rows.join("\n")],{type:"text/csv"}));
+  a.download=id+"_"+S.data.window.start+"_"+S.data.window.end+".csv";a.click();
+}
+
+$("chips").onclick=ev=>{const c=ev.target.closest(".chip");if(!c)return;const p=c.dataset.p;
+  if(!p)S.pods.clear();else S.pods.has(p)?S.pods.delete(p):S.pods.add(p);render()};
+$("weekSel").onchange=ev=>{S.week=ev.target.value===""?null:+ev.target.value;render()};
+$("metric").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;S.metric=b.dataset.m;
+  [...$("metric").children].forEach(x=>x.classList.toggle("on",x===b));render()};
+$("q").oninput=ev=>{S.q=ev.target.value.trim().toLowerCase();render()};
+$("grp").onchange=ev=>{S.group=ev.target.checked;render()};
+$("wknd").onchange=ev=>{S.wknd=ev.target.checked;render()};
+$("moreBtn").onclick=()=>{const m=$("more"),sh=m.style.display==="none";m.style.display=sh?"":"none";$("moreBtn").textContent=sh?"Hide validation & notes":"Show validation & notes"};
+$("apply").onclick=()=>{S.custom=true;load(false)};$("refresh").onclick=()=>load(true);$("reset").onclick=()=>{S.week=null;S.custom=false;load(true,true)};
+$("weekly").onclick=ev=>{const tr=ev.target.closest("tbody tr");if(!tr)return;const i=+tr.dataset.w;S.week=S.week===i?null:i;render()};
+document.addEventListener("click",ev=>{
+  const ph=ev.target.closest("tr.ph");if(ph){const p=ph.dataset.pod;S.col.has(p)?S.col.delete(p):S.col.add(p);render();return}
+  const nm=ev.target.closest(".name");if(nm){openEng(nm.dataset.e);return}
+  const h=ev.target.closest("th.s");if(h&&h.dataset.k){const k=h.dataset.k;S.sort=S.sort.k===k?{k,d:-S.sort.d}:{k,d:k==="name"?1:-1};render();return}
+  const x=ev.target.closest("[data-exp]");if(x)exportCsv(x.dataset.exp);
+  if(ev.target.id==="modal"||ev.target.id==="mclose")$("modal").style.display="none";
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("modal").style.display="none"});
+const tip=$("tip");
+$("heat").addEventListener("mouseover",ev=>{
+  const td=ev.target.closest("td.c");
+  document.querySelectorAll("#heat .hl").forEach(x=>x.classList.remove("hl"));
+  if(!td){tip.style.display="none";return}
+  const e=M.every.find(x=>x.id===td.dataset.e),i=+td.dataset.i,s=+td.dataset.s,g=D(td.dataset.d).getUTCDay();
+  tip.innerHTML=`<b>${esc(e.name)} · ${esc(e.pod)}</b>${DOW[g]} ${td.dataset.d}<br>Incident: ${i} · SR/Query: ${s} · Total: ${i+s}`;
+  tip.style.display="block";
+  document.querySelectorAll(`#heat [data-c="${td.dataset.c}"]`).forEach(x=>x.classList.add("hl"));
+});
+$("heat").addEventListener("mousemove",ev=>{tip.style.left=Math.min(ev.clientX+14,innerWidth-250)+"px";tip.style.top=(ev.clientY+14)+"px"});
+$("heat").addEventListener("mouseleave",()=>{tip.style.display="none";document.querySelectorAll("#heat .hl").forEach(x=>x.classList.remove("hl"))});
+
+load(false,true);
+setInterval(()=>load(false,!S.custom),5*60*1000);
+// background tabs throttle timers: refresh as soon as the tab is visible again if data is older than 5 min
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"&&S.data&&Date.now()-new Date(S.data.generated_at).getTime()>5*60*1000)load(false,!S.custom)});
+</script>
+</body>
+</html>

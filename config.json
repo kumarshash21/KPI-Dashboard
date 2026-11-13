@@ -1,0 +1,43 @@
+{
+  "mock": false,
+  "object": "Case",
+  "fields": {
+    "id": "Id",
+    "number": "CaseNumber",
+    "status": "Status",
+    "category": "Category__c",
+    "type": "Type",
+    "owner_id": "OwnerId",
+    "owner_name": "Owner.Name",
+    "end_time": "End_Time_of_Incident__c"
+  },
+  "soql_where": "Status = 'Solved'",
+  "include": [
+    {
+      "field": "Category__c",
+      "values": [
+        "Software"
+      ]
+    }
+  ],
+  "exclude": [
+    {
+      "field": "Type",
+      "values": [
+        "Alert"
+      ]
+    }
+  ],
+  "incident_types": [
+    "Incident"
+  ],
+  "filter_label": "Alerts · Hardware",
+  "timezone_offset_minutes": 330,
+  "roster_file": "roster.csv",
+  "cache_seconds": 280,
+  "rolling": {
+    "start_offset_days": 37,
+    "end_offset_days": 7,
+    "extend_to_week_start": true
+  }
+}

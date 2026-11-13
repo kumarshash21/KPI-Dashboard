@@ -1,0 +1,7 @@
+services:
+  sf-dashboard:
+    build: .
+    ports:
+      - "4173:4173"
+    env_file: .env          # secrets stay out of the image
+    restart: unless-stopped
