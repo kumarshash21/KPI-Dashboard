@@ -39,5 +39,12 @@
     "start_offset_days": 37,
     "end_offset_days": 7,
     "extend_to_week_start": true
-  }
+  },
+  "reopen_overrides": [
+    "300373",
+    "300586",
+    "290174",
+    "296871",
+    "289751"
+  ]
 }

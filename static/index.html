@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Owner by End Time</title>
+<title>Solved Tickets</title>
 <style>
-  :root{--bg:#17181c;--card:#212227;--line:#33353c;--txt:#eceef1;--mut:#9a9da6;--acc:#8aa9ff;
+  :root,html[data-theme=dark]{color-scheme:dark;--bg:#17181c;--acc-rgb:138,169,255;--warn:#e0a458;--warn-rgb:224,164,88;--asst:#c58bff;--asst-rgb:197,139,255;
+        --on:#262c3f;--ph:#262833;--phh:#2d3040;--hov:#2a2c33;--track:#2c2e35;--tagbg:#3a2a10;--tagtx:#ffc46b;--we:#c58b5a;--tipbg:#0f1013;--scrim:#000a;--sub2:#cfd3da;--onacc:#0d1630;
+        --zebra:rgba(255,255,255,.022);--hovtint:rgba(138,169,255,.10);--card:#212227;--line:#33353c;--txt:#eceef1;--mut:#9a9da6;--acc:#8aa9ff;
         --red:#4a1c2b;--redt:#ff9db0;--amb:#6a5216;--ambt:#ffd98a;--grn:#1d4a3d;--grnt:#8be8c5}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.4 -apple-system,Inter,"Segoe UI",sans-serif;padding:22px 26px 60px}
@@ -15,28 +17,28 @@
   input[type=number]{width:54px}
   .top{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
   .grow{flex:1}
-  .tag{background:#3a2a10;color:#ffc46b;border-radius:6px;padding:2px 8px;font-size:11px;margin-left:8px}
+  .tag{background:var(--tagbg);color:var(--tagtx);border-radius:6px;padding:2px 8px;font-size:11px;margin-left:8px}
   .win{color:var(--mut);font-size:12px;margin-bottom:12px}
   .tools{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px;color:var(--mut);font-size:12px}
   .tools label{display:flex;gap:6px;align-items:center}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
   .seg button{border:0;border-radius:0;background:transparent;padding:6px 12px;color:var(--mut)}
-  .seg button.on{background:var(--acc);color:#0d1630;font-weight:600}
+  .seg button.on{background:var(--acc);color:var(--onacc);font-weight:600}
   .chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
   .chip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;cursor:pointer;min-width:215px;user-select:none}
-  .chip:hover{border-color:var(--acc)}.chip.on{border-color:var(--acc);background:#262c3f}
+  .chip:hover{border-color:var(--acc)}.chip.on{border-color:var(--acc);background:var(--on)}
   .chip .row{display:flex;align-items:baseline;gap:8px}
   .chip .row b{font-size:12px;color:var(--mut)}.chip .row .v{font-size:20px;font-weight:700}
   .chip .pct{margin-left:auto;font-size:12px;color:var(--acc);font-weight:700}
   .chip .top2{font-size:12px;color:var(--mut);margin-top:6px;line-height:1.5}
-  .pbar{height:4px;background:#2c2e35;border-radius:3px;margin-top:8px;overflow:hidden}.pbar i{display:block;height:100%;background:var(--acc)}
+  .pbar{height:4px;background:var(--track);border-radius:3px;margin-top:8px;overflow:hidden}.pbar i{display:block;height:100%;background:var(--acc)}
   .star{color:#ffcf4a;margin-left:5px}
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:16px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 22px}
   .lbl{color:var(--mut);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
   .big{font-size:36px;font-weight:700;margin:4px 0 6px}.big.sm{font-size:26px;margin-top:10px}
   .sub{color:var(--mut);font-size:12px}
-  .bar2{height:6px;border-radius:4px;background:#2c2e35;margin-top:10px;overflow:hidden;display:flex}.bar2 i{display:block;height:100%}
+  .bar2{height:6px;border-radius:4px;background:var(--track);margin-top:10px;overflow:hidden;display:flex}.bar2 i{display:block;height:100%}
   .card h2{font-size:14px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
   .card h2 .sp{flex:1}.card h2 button{font-size:11px;padding:3px 9px;color:var(--mut)}
   .hint{color:var(--mut);font-size:12px;margin:0 0 12px}
@@ -49,16 +51,16 @@
   th:first-child,td:first-child{text-align:left}
   tr.tot td{border-top:2px solid var(--line);font-weight:700}
   .b{font-weight:700}
-  #weekly tbody tr{cursor:pointer}#weekly tbody tr:hover{background:#2a2c33}
-  #weekly tbody tr.on{background:#262c3f;outline:1px solid var(--acc)}
+  #weekly tbody tr{cursor:pointer}#weekly tbody tr:hover{background:var(--hov)}
+  #weekly tbody tr.on{background:var(--on);outline:1px solid var(--acc)}
   .name{cursor:pointer}.name:hover{color:var(--acc);text-decoration:underline}
   .pod{font-size:10px;border:1px solid var(--line);border-radius:5px;padding:0 5px;margin-left:7px;color:var(--mut)}
-  .nis{font-size:10px;background:#3a2a10;color:#ffc46b;border-radius:5px;padding:1px 6px;margin-left:7px}
+  .nis{font-size:10px;background:var(--tagbg);color:var(--tagtx);border-radius:5px;padding:1px 6px;margin-left:7px}
   #eng td.g{background:var(--grn)}#eng td.r{background:var(--red)}
-  #eng td span{color:var(--mut)}#eng td.g span,#eng td.r span{color:#cfd3da}
+  #eng td span{color:var(--mut)}#eng td.g span,#eng td.r span{color:var(--sub2)}
   #eng tbody tr:hover td{filter:brightness(1.25)}
-  tr.ph td{background:#262833;font-weight:700;cursor:pointer;border-top:1px solid var(--line)}
-  tr.ph:hover td{background:#2d3040}tr.ph .sub{font-weight:400}
+  tr.ph td{background:var(--ph);font-weight:700;cursor:pointer;border-top:1px solid var(--line)}
+  tr.ph:hover td{background:var(--phh)}tr.ph .sub{font-weight:400}
   #heat{width:auto;min-width:100%}
   #heat th,#heat td{padding:0;text-align:center}
   #heat th.nm,#heat td.nm{position:sticky;left:0;background:var(--card);z-index:2;text-align:left;padding:0 14px 0 0;min-width:210px;white-space:nowrap}
@@ -66,13 +68,13 @@
   #heat td.c.r{background:var(--red);color:var(--redt)}#heat td.c.a{background:var(--amb);color:var(--ambt)}#heat td.c.g{background:var(--grn);color:var(--grnt)}
   #heat td.c.hl,#heat th.hl{outline:1px solid var(--acc);outline-offset:-1px}
   #heat tr:hover td.nm{color:var(--acc)}
-  #heat th{padding:8px 4px;font-size:11px;font-weight:600}#heat th.we{color:#c58b5a}
+  #heat th{padding:8px 4px;font-size:11px;font-weight:600}#heat th.we{color:var(--we)}
   #heat td.x,#heat th.x{padding:0 10px;font-weight:700;min-width:54px;border-left:1px solid var(--line)}
-  #heat tr.ph td{padding:9px 4px}#heat tr.ph td.nm{background:#262833;padding:9px 14px}#heat tr.ph td.x{padding:0 10px}
+  #heat tr.ph td{padding:9px 4px}#heat tr.ph td.nm{background:var(--ph);padding:9px 14px}#heat tr.ph td.x{padding:0 10px}
   #heat tr.tot td{border-top:2px solid var(--line);font-weight:700}
   .legend{display:flex;gap:14px;align-items:center;color:var(--mut);font-size:12px;margin-bottom:12px;flex-wrap:wrap}
   .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
-  #tip{position:fixed;pointer-events:none;background:#0f1013;border:1px solid var(--acc);border-radius:8px;padding:8px 11px;font-size:12px;z-index:50;display:none;box-shadow:0 6px 20px #0008}
+  #tip{position:fixed;pointer-events:none;background:var(--tipbg);border:1px solid var(--acc);border-radius:8px;padding:8px 11px;font-size:12px;z-index:50;display:none;box-shadow:0 6px 20px #0008}
   #tip b{display:block;margin-bottom:3px}
   .err{color:#ff8a8a;padding:4px 0}
   .badge{display:inline-block;border-radius:5px;padding:1px 8px;font-size:11px;font-weight:700}
@@ -80,35 +82,78 @@
   #checks td,#rost td{text-align:left;white-space:normal}
   details summary{cursor:pointer;color:var(--acc);margin:8px 0}
   .notes li{margin:5px 0;color:var(--mut)}.notes b{color:var(--txt)}
-  #modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
+  #modal{position:fixed;inset:0;background:var(--scrim);display:none;align-items:center;justify-content:center;z-index:60;padding:20px}
   #modal .box{background:var(--card);border:1px solid var(--line);border-radius:16px;width:min(900px,100%);max-height:90vh;overflow:auto;padding:22px 26px}
   .mh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.mh h3{margin:0;font-size:18px}
   .stats{display:flex;gap:26px;margin:14px 0;flex-wrap:wrap}.stats div b{display:block;font-size:22px}
   .bars{display:flex;align-items:flex-end;gap:3px;height:130px;margin:10px 0 4px;border-bottom:1px solid var(--line)}
   .bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;min-width:6px}
-  .bars i{display:block;width:100%}.bars .inc{background:var(--acc)}.bars .srq{background:#e0a458}
+  .bars i{display:block;width:100%}.bars .inc{background:var(--acc)}.bars .srq{background:var(--warn)}
   .allc{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:26px;margin-bottom:14px;cursor:pointer}
-  .allc.on{border-color:var(--acc);background:#262c3f}
+  .allc.on{border-color:var(--acc);background:var(--on)}
   .allc .big{font-size:44px}
   .ins{list-style:none;margin:0;padding:0;columns:2;column-gap:28px}
   .ins li{margin:0 0 9px;color:var(--mut);break-inside:avoid;font-size:13px}.ins b{color:var(--txt)}
   .up{color:var(--grnt);font-weight:700}.dn{color:var(--redt);font-weight:700}
   @media(max-width:900px){.allc{grid-template-columns:1fr}.ins{columns:1}}
+  .tabs{display:flex;gap:6px;margin:4px 0 14px;border-bottom:1px solid var(--line)}
+  .tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--mut);padding:9px 16px;font-weight:600}
+  .tabs button.on{color:var(--txt);border-bottom-color:var(--acc)}
+  .kp3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;margin-bottom:16px}
+  @media(max-width:900px){.kp3{grid-template-columns:1fr}}
+  #eng2 th.g2{text-align:center;border-left:1px solid var(--line)}
+  #eng2 td.l,#eng2 th.l{border-left:1px solid var(--line)}
+  #eng2 td.ow{font-weight:600}
+  #tk td,#tk th{text-align:left;white-space:normal}
+  .flag{display:inline-block;background:var(--tagbg);color:var(--tagtx);border-radius:5px;padding:1px 6px;font-size:11px;margin:1px 3px 1px 0}
+  html[data-theme=light]{color-scheme:light;--bg:#f2f4fa;--card:#ffffff;--line:#dde2ec;--txt:#1a2233;--mut:#65708a;--acc:#3a63e8;--acc-rgb:58,99,232;
+        --red:#fde3e8;--redt:#b3203f;--amb:#fff1c9;--ambt:#8a5b00;--grn:#d8f4e6;--grnt:#0b7a4b;--warn:#d98a1c;--warn-rgb:217,138,28;--asst:#8a3ffc;--asst-rgb:138,63,252;
+        --on:#e8eeff;--ph:#eef1f8;--phh:#e4e9f5;--hov:#f1f4fb;--track:#e3e7f0;--tagbg:#fff0d6;--tagtx:#9a5b00;--we:#b86a1a;--tipbg:#ffffff;--scrim:#0006;--sub2:#33405a;--onacc:#ffffff;
+        --zebra:rgba(20,30,60,.028);--hovtint:rgba(58,99,232,.08)}
+  body,.card,.chip,button,input,select,th,td{transition:background-color .25s,color .25s,border-color .25s}
+  /* ---- colourful, interactive tables ---- */
+  thead th{background-image:linear-gradient(rgba(var(--acc-rgb),.10),rgba(var(--acc-rgb),.10));color:var(--txt)}
+  table tbody tr:nth-child(even) td{background-image:linear-gradient(var(--zebra),var(--zebra))}
+  table tbody tr:hover td{box-shadow:inset 0 0 0 999px var(--hovtint)}
+  table tbody tr.pin td{box-shadow:inset 0 0 0 999px rgba(var(--acc-rgb),.20)}
+  table tbody tr[data-r]{cursor:pointer}
+  .tall{max-height:72vh;overflow:auto}
+  .tall thead th{position:sticky;top:0;z-index:3;background-color:var(--card)}
+  #heat thead th.nm{z-index:6}
+  .av{display:inline-flex;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:8px;vertical-align:middle;flex:none}
+  .chip{transition:transform .15s,border-color .15s,background-color .25s}.chip:hover{transform:translateY(-2px)}
+  .card.sec{transition:box-shadow .2s}.card.sec:hover{box-shadow:0 6px 22px rgba(0,0,0,.14)}
+  #theme{min-width:92px}
+  .tbtn{font-size:11px;padding:3px 9px;color:var(--mut)}
+  .big{font-variant-numeric:tabular-nums}
+  #kpis2 .card:nth-child(1){border-top:3px solid var(--acc)}#kpis2 .card:nth-child(2){border-top:3px solid var(--asst)}#kpis2 .card:nth-child(3){border-top:3px solid var(--warn)}
+  #kpis2 .card:nth-child(1) .big{color:var(--acc)}#kpis2 .card:nth-child(2) .big{color:var(--asst)}#kpis2 .card:nth-child(3) .big{color:var(--warn)}
+  html[data-theme=dark]{--bad-rgb:255,107,139}html[data-theme=light]{--bad-rgb:214,48,86}
+  :root{--bad-rgb:255,107,139}
+  a.tbtn{border:1px solid var(--line);border-radius:8px;text-decoration:none;display:inline-block;background:var(--card);cursor:pointer}a.tbtn:hover{border-color:var(--acc)}
+  #kpis3 .card:nth-child(1){border-top:3px solid var(--acc)}#kpis3 .card:nth-child(2){border-top:3px solid var(--warn)}#kpis3 .card:nth-child(3){border-top:3px solid rgb(var(--bad-rgb))}
+  #kpis3 .card:nth-child(1) .big{color:var(--acc)}#kpis3 .card:nth-child(2) .big{color:var(--warn)}#kpis3 .card:nth-child(3) .big{color:rgb(var(--bad-rgb))}
+  #tk3 td,#tk3 th,#checks3 td{text-align:left;white-space:normal}
+  #podwk3 td,#podwk3 th{white-space:nowrap}
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("theme")||"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <div class="top">
-  <h1>Section 1 · Owner by End Time <small id="podLbl">— All</small><span id="mock"></span></h1>
+  <h1><span id="ttl">Section 1 · Solved Tickets</span> <small id="podLbl">— All</small><span id="mock"></span></h1>
   <span class="grow"></span>
   <label class="sub">From <input type="date" id="start"></label>
   <label class="sub">To <input type="date" id="end"></label>
   <button id="apply">Apply</button>
   <button id="refresh">&#8635; Refresh</button>
   <button id="reset" title="Back to the rolling window (today-37 .. today-7)">Rolling window</button>
+  <button id="theme" title="Switch light / dark theme"></button>
   <span class="sub" id="meta"></span>
 </div>
 <div class="win" id="win"></div>
 
+<div class="tabs"><button class="on" data-tab="1">Solved Tickets</button><button data-tab="2">Owner vs Assisted</button><button data-tab="3">Reopened Tickets</button></div>
+<div id="tab1">
 <div class="tools">
   <label>Week <select id="weekSel"><option value="">All weeks</option></select></label>
   <span>Metric</span>
@@ -129,9 +174,9 @@
 </div>
 
 <div class="card sec">
-  <h2>Per-engineer weekly (count / avg per working day) <span class="sp"></span><button data-exp="eng">Export CSV</button></h2>
+  <h2>Per-engineer weekly (count / avg per working day) <span class="sp"></span><button class="tbtn" data-act="exp">Expand all</button><button class="tbtn" data-act="col">Collapse all</button><button data-exp="eng">Export CSV</button></h2>
   <p class="hint">Grouped by POD with subtotals (click a POD row to collapse). ★ = top resolver in the POD. Each engineer's highest week is green, lowest is red. Click headers to sort, click a name for details.</p>
-  <div class="wrap"><table id="eng"></table></div>
+  <div class="wrap tall"><table id="eng"></table></div>
 </div>
 
 <div class="card sec">
@@ -140,7 +185,7 @@
     <span><i class="sw" style="background:var(--amb)"></i><span id="lgA"></span></span>
     <span><i class="sw" style="background:var(--grn)"></i><span id="lgG"></span></span>
     <span>Cell = Incident + SR/Query; hover shows the split. Click a date header to sort by that day.</span></div>
-  <div class="wrap"><table id="heat"></table></div>
+  <div class="wrap tall"><table id="heat"></table></div>
 </div>
 
 <div id="more" style="display:none">
@@ -164,6 +209,56 @@
 
 </div>
 <div style="text-align:center;margin-top:8px"><button id="moreBtn" style="color:var(--mut);font-size:12px">Show validation &amp; notes</button></div>
+</div><!-- /tab1 -->
+
+<div id="tab2" style="display:none">
+  <div class="tools">
+    <label>Week <select id="weekSel2"><option value="">All weeks</option></select></label>
+    <span>POD</span><div class="seg" id="podSeg2"></div>
+    <input id="q2" placeholder="Search engineer…" style="min-width:170px">
+    <label><input type="checkbox" id="grp2" checked> Group by POD</label>
+  </div>
+  <div id="err2" class="err"></div>
+  <div class="kp3" id="kpis2"></div>
+  <div class="card sec"><h2>Owner vs Assisted by week <span class="sp"></span><button data-exp="weekly2">Export CSV</button></h2>
+    <p class="hint">Table only. Click a week to filter the page to it (click again to clear).</p><div class="wrap"><table id="weekly2"></table></div></div>
+  <div class="card sec"><h2>Per-engineer Owner vs Assisted <span class="sp"></span><button class="tbtn" data-act="exp">Expand all</button><button class="tbtn" data-act="col">Collapse all</button><button data-exp="eng2">Export CSV</button></h2>
+    <p class="hint">Grouped by POD with subtotals (click a POD row to collapse), sorted by Owner total. Click Engineer / Owner / Assisted headers to sort.</p>
+    <div class="wrap"><table id="eng2"></table></div></div>
+  <div id="more2" style="display:none">
+    <div class="card sec"><h2>Validation checks</h2><div class="wrap"><table id="checks2"></table></div></div>
+    <div class="card sec"><h2>Assisted tickets <span id="tkCount" class="sub"></span><span class="sp"></span><button data-exp="tk">Export CSV</button></h2>
+      <p class="hint">Every Assisted ticket under the current filters, with the reason it counted. Amber flags mark borderline rows (about 40 words, requests for information, mostly pasted payloads).</p>
+      <div class="wrap tall"><table id="tk"></table></div></div>
+    <div class="card sec"><h2>Notes</h2><ul class="notes" id="notes2"></ul></div>
+  </div>
+  <div style="text-align:center;margin-top:8px"><button id="moreBtn2" style="color:var(--mut);font-size:12px">Show validation list &amp; notes</button></div>
+</div>
+
+<div id="tab3" style="display:none">
+  <div class="tools">
+    <label>Week <select id="weekSel3"><option value="">All weeks</option></select></label>
+    <span>POD</span><div class="seg" id="podSeg3"></div>
+    <input id="q3" placeholder="Search engineer…" style="min-width:170px">
+  </div>
+  <div id="err3" class="err"></div>
+  <div class="kp3" id="kpis3"></div>
+  <div class="card sec"><h2>Reopened by week <span class="sp"></span><a class="tbtn" id="xlsx3" href="/api/reopened.xlsx">⬇ Excel: reopened tickets</a><button data-exp="weekly3">Export CSV</button></h2>
+    <p class="hint">Click a week to filter the page to it (click again to clear).</p><div class="wrap"><table id="weekly3"></table></div></div>
+  <div class="card sec"><h2>POD summary <span class="sp"></span><button data-exp="pod3">Export CSV</button></h2><div class="wrap"><table id="pod3"></table></div></div>
+  <div class="card sec"><h2>Weekly by POD (reopened / solved · %) <span class="sp"></span><button data-exp="podwk3">Export CSV</button></h2><div class="wrap"><table id="podwk3"></table></div></div>
+  <div class="card sec"><h2>Per-engineer reopened (sorted by reopened total) <span class="sp"></span><button class="tbtn" data-act="exp">Expand all</button><button class="tbtn" data-act="col">Collapse all</button><button data-exp="eng3">Export CSV</button></h2>
+    <p class="hint">Grouped by POD with subtotals (click a POD row to collapse); rank is within the POD. Weekly cells show reopened / solved. Click headers to sort, click a name for that engineer's reopened tickets.</p>
+    <div class="wrap tall"><table id="eng3"></table></div></div>
+  <div id="more3" style="display:none">
+    <div class="card sec"><h2>Validation checks</h2><div class="wrap"><table id="checks3"></table></div></div>
+    <div class="card sec"><h2>Reopened tickets in the window <span id="tkCount3" class="sub"></span><span class="sp"></span><button data-exp="tk3">Export CSV</button></h2>
+      <p class="hint">Yellow rows were excluded as closures; green rows are manual overrides (always counted).</p><div class="wrap tall"><table id="tk3"></table></div></div>
+    <div class="card sec"><h2>Notes</h2><ul class="notes" id="notes3"></ul></div>
+  </div>
+  <div style="text-align:center;margin-top:8px"><button id="moreBtn3" style="color:var(--mut);font-size:12px">Show validation list &amp; notes</button></div>
+</div>
+
 <div id="tip"></div>
 <div id="modal"><div class="box" id="mbox"></div></div>
 
@@ -175,7 +270,8 @@ const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","De
 const D=s=>new Date(s+"T00:00:00Z"),iso=d=>d.toISOString().slice(0,10);
 const addD=(d,k)=>new Date(d.getTime()+k*864e5);
 const fmtMD=s=>{const d=D(s);return MON[d.getUTCMonth()]+" "+d.getUTCDate()};
-const S={data:null,pods:new Set(),metric:"all",q:"",sort:{k:"tot",d:-1},week:null,wknd:true,custom:false,group:true,col:new Set(),low:3,high:5};
+const S3={data:null,sort:{k:"ro",d:-1},q:""};
+const S={pin:new Set(),tab:1,data:null,pods:new Set(),metric:"all",q:"",sort:{k:"tot",d:-1},week:null,wknd:true,custom:false,group:true,col:new Set(),low:3,high:5};
 let M=null;
 
 async function load(force,rolling){
@@ -238,7 +334,8 @@ function model(){
 
 function render(){
   if(!S.data)return;M=model();fillWeekSel();
-  renderChips();renderWeekly();renderEng();renderHeat();renderValidation();
+  renderChips();renderWeekly();renderEng();renderHeat();renderValidation();enhance1();
+  if(S2.data)render2();if(S3.data)render3();
   $("podLbl").textContent="— "+(S.pods.size?[...S.pods].sort().join(", "):"All")+(S.week!=null?" · "+weekLabel(M.weeks[S.week]):"");
 }
 function weekLabel(w){return fmtMD(w.from)+" – "+fmtMD(w.to)+(w.partial?" (Partial)":"")}
@@ -264,10 +361,9 @@ function renderWeekly(){
     all.forEach(e=>w.dates.forEach(x=>{const c=e.days[x];if(c){i+=c[0];s+=c[1];pp[e.pod]=(pp[e.pod]||0)+c[0]+c[1]}}));return{w,i,s,pp}});
   const pt={};pc.forEach(p=>pt[p]=0);
   rows.forEach(r=>{ti+=r.i;ts+=r.s;td+=r.w.wd;pc.forEach(p=>pt[p]+=r.pp[p]||0)});
-  $("weekly").innerHTML=`<thead><tr><th>Week</th><th>Days</th><th>Incidents</th><th>SR/Query</th><th>Total</th><th>Avg/working day</th>${pc.map((p,i)=>`<th style="${i?"":"border-left:1px solid var(--line)"}">${esc(p)}</th>`).join("")}</tr></thead><tbody>`+
-   rows.map((r,idx)=>`<tr data-w="${idx}" class="${S.week===idx?"on":""}"><td>${esc(weekLabel(r.w))}</td><td>${r.w.wd}</td><td>${n(r.i)}</td><td>${n(r.s)}</td>
-     <td class="b">${n(r.i+r.s)}</td><td>${r.w.wd?((r.i+r.s)/r.w.wd).toFixed(1):"0.0"}</td>${pc.map(p=>`<td>${n(r.pp[p])}</td>`).join("")}</tr>`).join("")+
-   `</tbody><tfoot><tr class="tot"><td>Total</td><td>${td}</td><td>${n(ti)}</td><td>${n(ts)}</td><td>${n(ti+ts)}</td><td>${td?((ti+ts)/td).toFixed(1):"0.0"}</td>${pc.map(p=>`<td>${n(pt[p])}</td>`).join("")}</tr></tfoot>`;
+  $("weekly").innerHTML=`<thead><tr><th>Week</th><th>Incidents</th><th>SR/Query</th>${pc.map(p=>`<th>${esc(p)}</th>`).join("")}<th>Total</th></tr></thead><tbody>`+
+   rows.map((r,idx)=>`<tr data-w="${idx}" class="${S.week===idx?"on":""}"><td>${esc(weekLabel(r.w))}</td><td>${n(r.i)}</td><td>${n(r.s)}</td>${pc.map(p=>`<td>${n(r.pp[p])}</td>`).join("")}<td class="b">${n(r.i+r.s)}</td></tr>`).join("")+
+   `</tbody><tfoot><tr class="tot"><td>Total</td><td>${n(ti)}</td><td>${n(ts)}</td>${pc.map(p=>`<td>${n(pt[p])}</td>`).join("")}<td>${n(ti+ts)}</td></tr></tfoot>`;
 }
 const th=(k,label,cls="")=>`<th class="s ${cls} ${S.sort.k===k?"sel":""}" data-k="${k}">${label}${S.sort.k===k?(S.sort.d<0?" ▾":" ▴"):""}</th>`;
 function groups(){
@@ -334,15 +430,16 @@ function openEng(id){
   $("mbox").innerHTML=`<div class="mh"><div><h3>${esc(e.name)} <span class="pod">${esc(e.pod)}</span>${e.status==="not_in_salesforce"?'<span class="nis">not in Salesforce yet</span>':""}</h3><div class="sub">${esc(e.email)}</div></div><button id="mclose">Close ✕</button></div>
    <div class="stats"><div><b>${inc+sr}</b><span class="sub">Total</span></div><div><b>${inc}</b><span class="sub">Incidents</span></div><div><b>${sr}</b><span class="sub">SR/Query</span></div>
    <div><b>${((inc+sr)/M.wdTotal).toFixed(1)}</b><span class="sub">Avg / working day</span></div><div><b>${best[1]}</b><span class="sub">Best day ${best[0]?fmtMD(best[0]):"–"}</span></div></div>
-   <div class="sub">Daily tickets (<span style="color:var(--acc)">■</span> Incident <span style="color:#e0a458">■</span> SR/Query)</div>
+   <div class="sub">Daily tickets (<span style="color:var(--acc)">■</span> Incident <span style="color:var(--warn)">■</span> SR/Query)</div>
    <div class="bars">${days.map(x=>{const c=e.days[x]||[0,0];return`<div title="${x} · ${c[0]} incident, ${c[1]} SR/Query"><i class="srq" style="height:${c[1]/mx*120}px"></i><i class="inc" style="height:${c[0]/mx*120}px"></i></div>`}).join("")}</div>
    <div class="sub" style="display:flex;justify-content:space-between"><span>${fmtMD(days[0])}</span><span>${fmtMD(days[days.length-1])}</span></div>
    <table style="margin-top:14px"><thead><tr><th>Week</th><th>Days</th><th>Incidents</th><th>SR/Query</th><th>Total</th><th>Avg/day</th></tr></thead><tbody>`+
    M.weeks.map(w=>{let i=0,s=0;w.dates.forEach(x=>{const c=e.days[x];if(c){i+=c[0];s+=c[1]}});return`<tr><td>${esc(weekLabel(w))}</td><td>${w.wd}</td><td>${i}</td><td>${s}</td><td class="b">${i+s}</td><td>${w.wd?((i+s)/w.wd).toFixed(1):"0.0"}</td></tr>`}).join("")+`</tbody></table>`;
   $("modal").style.display="flex";
 }
+function cellText(c){const k=c.cloneNode(true);k.querySelectorAll(".av").forEach(x=>x.remove());return k.textContent}
 function exportCsv(id){
-  const rows=[...$(id).querySelectorAll("tr")].map(tr=>[...tr.children].map(c=>'"'+c.textContent.replace(/\s+/g," ").trim().replace(/"/g,'""')+'"').join(","));
+  const rows=[...$(id).querySelectorAll("tr")].map(tr=>[...tr.children].map(c=>'"'+cellText(c).replace(/\s+/g," ").trim().replace(/"/g,'""')+'"').join(","));
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rows.join("\n")],{type:"text/csv"}));
   a.download=id+"_"+S.data.window.start+"_"+S.data.window.end+".csv";a.click();
 }
@@ -356,11 +453,11 @@ $("q").oninput=ev=>{S.q=ev.target.value.trim().toLowerCase();render()};
 $("grp").onchange=ev=>{S.group=ev.target.checked;render()};
 $("wknd").onchange=ev=>{S.wknd=ev.target.checked;render()};
 $("moreBtn").onclick=()=>{const m=$("more"),sh=m.style.display==="none";m.style.display=sh?"":"none";$("moreBtn").textContent=sh?"Hide validation & notes":"Show validation & notes"};
-$("apply").onclick=()=>{S.custom=true;load(false)};$("refresh").onclick=()=>load(true);$("reset").onclick=()=>{S.week=null;S.custom=false;load(true,true)};
+$("apply").onclick=()=>{S.custom=true;load(false);reloadActive(false)};$("refresh").onclick=()=>{load(true);reloadActive(true)};$("reset").onclick=()=>{S.week=null;S.custom=false;load(true,true);reloadActive(true)};
 $("weekly").onclick=ev=>{const tr=ev.target.closest("tbody tr");if(!tr)return;const i=+tr.dataset.w;S.week=S.week===i?null:i;render()};
 document.addEventListener("click",ev=>{
   const ph=ev.target.closest("tr.ph");if(ph){const p=ph.dataset.pod;S.col.has(p)?S.col.delete(p):S.col.add(p);render();return}
-  const nm=ev.target.closest(".name");if(nm){openEng(nm.dataset.e);return}
+  const nm=ev.target.closest(".name");if(nm){nm.classList.contains("name3")?openEng3(nm.dataset.e):nm.classList.contains("name2")?openEng2(nm.dataset.e):openEng(nm.dataset.e);return}
   const h=ev.target.closest("th.s");if(h&&h.dataset.k){const k=h.dataset.k;S.sort=S.sort.k===k?{k,d:-S.sort.d}:{k,d:k==="name"?1:-1};render();return}
   const x=ev.target.closest("[data-exp]");if(x)exportCsv(x.dataset.exp);
   if(ev.target.id==="modal"||ev.target.id==="mclose")$("modal").style.display="none";
@@ -379,11 +476,321 @@ $("heat").addEventListener("mouseover",ev=>{
 $("heat").addEventListener("mousemove",ev=>{tip.style.left=Math.min(ev.clientX+14,innerWidth-250)+"px";tip.style.top=(ev.clientY+14)+"px"});
 $("heat").addEventListener("mouseleave",()=>{tip.style.display="none";document.querySelectorAll("#heat .hl").forEach(x=>x.classList.remove("hl"))});
 
+/* ================= Tab 2: Owner vs Assisted ================= */
+const S2={data:null,sort:{k:"owT",d:-1},q:""};
+async function loadTab2(force){
+  $("err2").textContent="";
+  $("meta").textContent="Loading Owner vs Assisted (reads email bodies, can take a minute)…";
+  const q=new URLSearchParams();
+  if(S.custom){if($("start").value)q.set("start",$("start").value);if($("end").value)q.set("end",$("end").value)}
+  if(force)q.set("refresh","true");
+  try{
+    const r=await fetch("/api/assisted?"+q,{cache:"no-store"});
+    if(!r.ok)throw new Error((await r.text()).slice(0,400));
+    S2.data=await r.json();
+    $("meta").textContent="Last refreshed "+S2.data.generated_at.replace("T"," ");
+    render2();
+  }catch(e){$("err2").textContent="Error: "+e.message;$("meta").textContent=""}
+}
+function model2(){
+  const d=S2.data,W=d.window,dates=[];
+  for(let x=D(W.start);x<=D(W.end);x=addD(x,1))dates.push(iso(x));
+  const weeks=buildWeeks(dates),sw=(S.week!=null&&weeks[S.week])?S.week:null;
+  const scope=sw!=null?weeks[sw].dates:dates;
+  const sumO=(e,ds)=>ds.reduce((a,x)=>{const c=e.owner_days[x];return a+(c?c[0]+c[1]:0)},0);
+  const sumA=(e,ds)=>ds.reduce((a,x)=>a+(e.assisted_days[x]||0),0);
+  let engs=d.engineers.filter(e=>(!S.pods.size||S.pods.has(e.pod))&&(!S2.q||e.name.toLowerCase().includes(S2.q)||e.email.toLowerCase().includes(S2.q)))
+    .map(e=>({...e,ow:weeks.map(w=>sumO(e,w.dates)),as:weeks.map(w=>sumA(e,w.dates)),owT:sumO(e,scope),asT:sumA(e,scope)}));
+  const {k,d:dir}=S2.sort,key=e=>k==="name"?e.name.toLowerCase():e[k];
+  engs.sort((a,b)=>{const x=key(a),y=key(b),c=(x>y)-(x<y);return c?c*dir:(b.owT-a.owT)||a.name.localeCompare(b.name)});
+  const inScope=new Set(scope);
+  const tickets=d.tickets.filter(t=>(!S.pods.size||S.pods.has(t.engineer_pod))&&inScope.has(t.date)&&(!S2.q||t.engineer.toLowerCase().includes(S2.q)));
+  return{dates,weeks,sw,scope,engs,tickets,all:d.engineers.filter(e=>!S.pods.size||S.pods.has(e.pod)).map(e=>({...e,ow:weeks.map(w=>sumO(e,w.dates)),as:weeks.map(w=>sumA(e,w.dates))}))};
+}
+function render2(){
+  if(!S2.data)return;
+  const m=model2(),d=S2.data;
+  // week select + POD segmented filter
+  const sel=$("weekSel2"),want=["All weeks",...m.weeks.map(weekLabel)];
+  if([...sel.options].map(o=>o.text).join("|")!==want.join("|"))sel.innerHTML=want.map((t,i)=>`<option value="${i?i-1:""}">${esc(t)}</option>`).join("");
+  sel.value=m.sw==null?"":String(m.sw);
+  $("podSeg2").innerHTML=`<button data-p="" class="${S.pods.size?"":"on"}">All</button>`+d.pods.map(p=>`<button data-p="${esc(p)}" class="${S.pods.size===1&&S.pods.has(p)?"on":""}">${esc(p)}</button>`).join("");
+  // KPIs
+  const ow=m.engs.reduce((a,e)=>a+e.owT,0),as=m.engs.reduce((a,e)=>a+e.asT,0);
+  const distinct=new Set(m.tickets.map(t=>t.case_id)).size;
+  $("kpis2").innerHTML=`<div class="card"><div class="lbl">Owner total</div><div class="big">${n(ow)}</div></div>
+   <div class="card"><div class="lbl">Assisted total</div><div class="big">${n(as)}</div><div class="sub">${n(distinct)} distinct tickets</div></div>
+   <div class="card"><div class="lbl">Assisted share of owner</div><div class="big">${ow?(as/ow*100).toFixed(1):"0.0"}%</div></div>`;
+  // weekly summary
+  const rows=m.weeks.map((w,i)=>({w,i,o:m.all.reduce((a,e)=>a+e.ow[i],0),a:m.all.reduce((a,e)=>a+e.as[i],0)}));
+  $("weekly2").innerHTML=`<thead><tr><th>Week</th><th>Owner</th><th>Assisted</th></tr></thead><tbody>`+
+    rows.map(r=>`<tr data-w="${r.i}" class="${m.sw===r.i?"on":""}"><td>${esc(weekLabel(r.w))}</td><td>${n(r.o)}</td><td>${n(r.a)}</td></tr>`).join("")+
+    `</tbody><tfoot><tr class="tot"><td>Total</td><td>${n(rows.reduce((a,r)=>a+r.o,0))}</td><td>${n(rows.reduce((a,r)=>a+r.a,0))}</td></tr></tfoot>`;
+  // per-engineer
+  const idx=m.weeks.map((_,i)=>i).filter(i=>m.sw==null||i===m.sw);
+  const sh=(k,l,cls="")=>`<th class="s2 ${cls} ${S2.sort.k===k?"sel":""}" data-k="${k}">${l}${S2.sort.k===k?(S2.sort.d<0?" ▾":" ▴"):""}</th>`;
+  const head=`<thead><tr><th rowspan="2" class="s2 ${S2.sort.k==="name"?"sel":""}" data-k="name">Engineer${S2.sort.k==="name"?(S2.sort.d<0?" ▾":" ▴"):""}</th>`+
+    idx.map(i=>`<th colspan="2" class="g2">${esc(weekLabel(m.weeks[i]))}</th>`).join("")+`<th colspan="2" class="g2">${m.sw==null?"Window total":"Week total"}</th></tr><tr>`+
+    idx.map(()=>`<th class="l">Owner</th><th>Assisted</th>`).join("")+sh("owT","Owner","l")+sh("asT","Assisted")+`</tr></thead>`;
+  const nm=e=>`<span class="name name2" data-e="${esc(e.id)}">${esc(e.name)}</span>${e.status==="not_in_salesforce"?'<span class="nis">not in Salesforce yet</span>':""}${S.group2===false?`<span class="pod">${esc(e.pod)}</span>`:""}`;
+  const row=e=>`<tr><td>${nm(e)}</td>`+idx.map(i=>`<td class="l ow">${e.ow[i]}</td><td>${e.as[i]}</td>`).join("")+`<td class="l ow b">${n(e.owT)}</td><td class="b">${n(e.asT)}</td></tr>`;
+  const grouped=$("grp2").checked;
+  let list=grouped?[...new Set(m.engs.map(e=>e.pod))].sort().map(p=>({pod:p,list:m.engs.filter(e=>e.pod===p)})):[{pod:null,list:m.engs}];
+  let body="";
+  list.forEach(g=>{
+    if(g.pod){const so=idx.map(i=>g.list.reduce((a,e)=>a+e.ow[i],0)),sa=idx.map(i=>g.list.reduce((a,e)=>a+e.as[i],0));
+      body+=`<tr class="ph" data-pod="${esc(g.pod)}"><td>${S.col.has(g.pod)?"▸":"▾"} ${esc(g.pod)}</td>`+idx.map((_,j)=>`<td class="l">${so[j]}</td><td>${sa[j]}</td>`).join("")+
+        `<td class="l">${n(g.list.reduce((a,e)=>a+e.owT,0))}</td><td>${n(g.list.reduce((a,e)=>a+e.asT,0))}</td></tr>`}
+    if(!g.pod||!S.col.has(g.pod))g.list.forEach(e=>body+=row(e));
+  });
+  $("eng2").innerHTML=head+`<tbody>${body||`<tr><td colspan="${idx.length*2+3}" class="sub">No engineers match.</td></tr>`}</tbody>`;
+  // validation
+  $("checks2").innerHTML=`<thead><tr><th>Check</th><th>Result</th><th>Detail</th></tr></thead><tbody>`+
+    d.checks.map(c=>`<tr><td>${esc(c.name)}</td><td><span class="badge ${c.ok?"pass":"fail"}">${c.ok?"PASS":"FAIL"}</span></td><td class="sub">${esc(c.detail)}</td></tr>`).join("")+`</tbody>`;
+  $("tkCount").textContent="· "+m.tickets.length+" rows · "+m.tickets.filter(t=>t.flags.length).length+" flagged";
+  $("tk").innerHTML=`<thead><tr><th>Case</th><th>Account</th><th>Owner (POD)</th><th>Assisting engineer (POD)</th><th>Why it counted</th><th>Flags</th></tr></thead><tbody>`+
+    m.tickets.map(t=>`<tr><td>${esc(t.case)}</td><td>${esc(t.account)}</td><td>${esc(t.owner)} (${esc(t.owner_pod)})</td><td>${esc(t.engineer)} (${esc(t.engineer_pod)})</td><td>${esc(t.reasons.join(" + "))}</td><td>${t.flags.map(f=>`<span class="flag">${esc(f)}</span>`).join("")}</td></tr>`).join("")+`</tbody>`;
+  $("notes2").innerHTML=d.notes.map(x=>`<li>${esc(x)}</li>`).join("");
+  enhance2();
+}
+function reloadActive(force){if(S.tab===2)loadTab2(force);else if(S.tab===3)loadTab3(force)}
+function setTab(t){
+  S.tab=t;
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",+b.dataset.tab===t));
+  $("tab1").style.display=t===1?"":"none";$("tab2").style.display=t===2?"":"none";$("tab3").style.display=t===3?"":"none";
+  $("ttl").textContent=["","Section 1 · Solved Tickets","Section 2 · Owner vs Assisted","Section 3 · Reopened Tickets"][t];
+  if(t===2){if(S2.data)render2();else loadTab2(false)}
+  if(t===3){if(S3.data)render3();else loadTab3(false)}
+}
+document.querySelector(".tabs").onclick=ev=>{const b=ev.target.closest("button");if(b)setTab(+b.dataset.tab)};
+$("weekSel2").onchange=ev=>{S.week=ev.target.value===""?null:+ev.target.value;render()};
+$("podSeg2").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;S.pods.clear();if(b.dataset.p)S.pods.add(b.dataset.p);render()};
+$("q2").oninput=ev=>{S2.q=ev.target.value.trim().toLowerCase();render2()};
+$("grp2").onchange=()=>render2();
+$("weekly2").onclick=ev=>{const tr=ev.target.closest("tbody tr");if(!tr)return;const i=+tr.dataset.w;S.week=S.week===i?null:i;render()};
+$("eng2").onclick=ev=>{const h=ev.target.closest("th.s2");if(!h)return;const k=h.dataset.k;S2.sort=S2.sort.k===k?{k,d:-S2.sort.d}:{k,d:k==="name"?1:-1};render2()};
+$("moreBtn2").onclick=()=>{const m=$("more2"),sh=m.style.display==="none";m.style.display=sh?"":"none";$("moreBtn2").textContent=sh?"Hide validation list & notes":"Show validation list & notes"};
+
+/* ================= Tab 3: Reopened tickets ================= */
+async function loadTab3(force){
+  $("err3").textContent="";
+  $("meta").textContent="Loading Reopened tickets (reads status history and comments, can take a minute)…";
+  const q=new URLSearchParams();
+  if(S.custom){if($("start").value)q.set("start",$("start").value);if($("end").value)q.set("end",$("end").value)}
+  if(force)q.set("refresh","true");
+  try{
+    const r=await fetch("/api/reopened?"+q,{cache:"no-store"});
+    if(!r.ok)throw new Error((await r.text()).slice(0,400));
+    S3.data=await r.json();
+    $("meta").textContent="Last refreshed "+S3.data.generated_at.replace("T"," ");
+    render3();
+  }catch(e){$("err3").textContent="Error: "+e.message;$("meta").textContent=""}
+}
+const pct3=(r,s)=>s?(r/s*100).toFixed(1)+"%":"n/a";
+function model3(){
+  const d=S3.data,W=d.window,dates=[];
+  for(let x=D(W.start);x<=D(W.end);x=addD(x,1))dates.push(iso(x));
+  const weeks=buildWeeks(dates),sw=(S.week!=null&&weeks[S.week])?S.week:null,scope=sw!=null?weeks[sw].dates:dates;
+  const sv=(e,ds)=>ds.reduce((a,x)=>a+(e.solved_days[x]||0),0);
+  const rb=(e,ds)=>ds.reduce((a,x)=>{const c=e.reopen_days[x];return c?[a[0]+c[0],a[1]+c[1],a[2]+c[2]]:a},[0,0,0]);
+  const all=d.engineers.filter(e=>!S.pods.size||S.pods.has(e.pod)).map(e=>({...e,sw:weeks.map(w=>sv(e,w.dates)),rw:weeks.map(w=>rb(e,w.dates)),so:sv(e,scope),rr:rb(e,scope)}));
+  const k=S3.sort.k,dir=S3.sort.d,key=e=>k==="name"?e.name.toLowerCase():k==="pod"?e.pod:k==="so"?e.so:k==="pc"?(e.so?e.rr[2]/e.so:-1):k[0]==="w"?e.rw[+k.slice(1)][2]:e.rr[2];
+  let engs=all.filter(e=>!S3.q||e.name.toLowerCase().includes(S3.q)).sort((a,b)=>{const x=key(a),y=key(b),c=(x>y)-(x<y);return c?c*dir:(b.rr[2]-a.rr[2])||a.name.localeCompare(b.name)});
+  const inScope=new Set(scope),tickets=d.tickets.filter(t=>(!S.pods.size||S.pods.has(t.owner_pod))&&inScope.has(t.reopen_date)&&(!S3.q||t.owner.toLowerCase().includes(S3.q)));
+  return{dates,weeks,sw,scope,all,engs,tickets};
+}
+function render3(){
+  if(!S3.data)return;
+  const m=model3(),d=S3.data;
+  const sel=$("weekSel3"),want=["All weeks",...m.weeks.map(weekLabel)];
+  if([...sel.options].map(o=>o.text).join("|")!==want.join("|"))sel.innerHTML=want.map((t,i)=>`<option value="${i?i-1:""}">${esc(t)}</option>`).join("");
+  sel.value=m.sw==null?"":String(m.sw);
+  $("podSeg3").innerHTML=`<button data-p="" class="${S.pods.size?"":"on"}">All</button>`+d.pods.map(p=>`<button data-p="${esc(p)}" class="${S.pods.size===1&&S.pods.has(p)?"on":""}">${esc(p)}</button>`).join("");
+  $("xlsx3").href="/api/reopened.xlsx"+(S.custom?`?start=${$("start").value}&end=${$("end").value}`:"");
+  const sO=m.all.reduce((a,e)=>a+e.so,0),rO=m.all.reduce((a,e)=>a+e.rr[2],0);
+  $("kpis3").innerHTML=`<div class="card"><div class="lbl">Total solved (roster-owned)</div><div class="big">${n(sO)}</div></div>
+   <div class="card"><div class="lbl">Reopened (after exclusion)</div><div class="big">${n(rO)}</div></div>
+   <div class="card"><div class="lbl">Reopen %</div><div class="big">${pct3(rO,sO)}</div></div>`;
+  // weekly summary
+  const rows=m.weeks.map((w,i)=>({w,i,s:m.all.reduce((a,e)=>a+e.sw[i],0),b:m.all.reduce((a,e)=>a+e.rw[i][0],0),x:m.all.reduce((a,e)=>a+e.rw[i][1],0),r:m.all.reduce((a,e)=>a+e.rw[i][2],0)}));
+  const T=rows.reduce((a,r)=>({d:a.d+r.w.wd,s:a.s+r.s,b:a.b+r.b,x:a.x+r.x,r:a.r+r.r}),{d:0,s:0,b:0,x:0,r:0});
+  $("weekly3").innerHTML=`<thead><tr><th>Week</th><th>Days</th><th>Solved</th><th>Reopened (before excl.)</th><th>Excluded as closure</th><th>Reopened</th><th>Reopen %</th></tr></thead><tbody>`+
+    rows.map(r=>`<tr data-w="${r.i}" class="${m.sw===r.i?"on":""}"><td>${esc(weekLabel(r.w))}</td><td>${r.w.wd}</td><td>${n(r.s)}</td><td>${n(r.b)}</td><td>${n(r.x)}</td><td class="b">${n(r.r)}</td><td>${pct3(r.r,r.s)}</td></tr>`).join("")+
+    `</tbody><tfoot><tr class="tot"><td>Total</td><td>${T.d}</td><td>${n(T.s)}</td><td>${n(T.b)}</td><td>${n(T.x)}</td><td>${n(T.r)}</td><td>${pct3(T.r,T.s)}</td></tr></tfoot>`;
+  // POD summary + weekly by POD
+  const pods=S.pods.size?d.pods.filter(p=>S.pods.has(p)):d.pods;
+  $("pod3").innerHTML=`<thead><tr><th>POD</th><th>Engineers</th><th>Solved</th><th>Reopened</th><th>Reopen %</th></tr></thead><tbody>`+
+    pods.map(p=>{const es=m.all.filter(e=>e.pod===p),so=es.reduce((a,e)=>a+e.so,0),ro=es.reduce((a,e)=>a+e.rr[2],0);
+      return`<tr data-pod="${esc(p)}"><td>${esc(p)}</td><td>${es.length}</td><td>${n(so)}</td><td class="b">${n(ro)}</td><td>${pct3(ro,so)}</td></tr>`}).join("")+
+    `</tbody><tfoot><tr class="tot"><td>Total</td><td>${m.all.length}</td><td>${n(sO)}</td><td>${n(rO)}</td><td>${pct3(rO,sO)}</td></tr></tfoot>`;
+  $("podwk3").innerHTML=`<thead><tr><th>POD</th>${m.weeks.map(w=>`<th>${esc(weekLabel(w))}</th>`).join("")}<th>Total</th></tr></thead><tbody>`+
+    pods.map(p=>{const es=m.all.filter(e=>e.pod===p);
+      return`<tr data-pod="${esc(p)}"><td>${esc(p)}</td>`+m.weeks.map((w,i)=>{const so=es.reduce((a,e)=>a+e.sw[i],0),ro=es.reduce((a,e)=>a+e.rw[i][2],0);return`<td>${ro} / ${so} · ${pct3(ro,so)}</td>`}).join("")+
+        `<td class="b">${es.reduce((a,e)=>a+e.rr[2],0)} / ${es.reduce((a,e)=>a+e.so,0)} · ${pct3(es.reduce((a,e)=>a+e.rr[2],0),es.reduce((a,e)=>a+e.so,0))}</td></tr>`}).join("")+`</tbody>`;
+  // per-engineer
+  const idx=m.weeks.map((_,i)=>i).filter(i=>m.sw==null||i===m.sw);
+  const sh=(k,l)=>`<th class="s3 ${S3.sort.k===k?"sel":""}" data-k="${k}">${l}${S3.sort.k===k?(S3.sort.d<0?" ▾":" ▴"):""}</th>`;
+  const rowE=(e,r)=>`<tr><td>${r}</td><td><span class="name name3" data-e="${esc(e.id)}">${esc(e.name)}</span>${e.status==="not_in_salesforce"?'<span class="nis">not in Salesforce yet</span>':""}</td><td>${n(e.so)}</td><td class="b">${n(e.rr[2])}</td><td>${pct3(e.rr[2],e.so)}</td>`+
+    idx.map(i=>`<td>${e.rw[i][2]} / ${e.sw[i]}</td>`).join("")+`</tr>`;
+  let body="";
+  [...new Set(m.engs.map(e=>e.pod))].sort().forEach(p=>{
+    const g=m.engs.filter(e=>e.pod===p),so=g.reduce((a,e)=>a+e.so,0),ro=g.reduce((a,e)=>a+e.rr[2],0);
+    body+=`<tr class="ph" data-pod="${esc(p)}"><td colspan="2">${S.col.has(p)?"▸":"▾"} ${esc(p)} <span class="sub">· ${g.length} eng</span></td><td>${n(so)}</td><td>${n(ro)}</td><td>${pct3(ro,so)}</td>`+
+      idx.map(i=>`<td>${g.reduce((a,e)=>a+e.rw[i][2],0)} / ${g.reduce((a,e)=>a+e.sw[i],0)}</td>`).join("")+`</tr>`;
+    if(!S.col.has(p))g.forEach((e,r)=>body+=rowE(e,r+1));
+  });
+  $("eng3").innerHTML=`<thead><tr><th>Rank</th>${sh("name","Engineer")}${sh("so","Solved")}${sh("ro","Reopened")}${sh("pc","Reopen %")}${idx.map(i=>sh("w"+i,esc(weekLabel(m.weeks[i])))).join("")}</tr></thead><tbody>${body||`<tr><td colspan="${idx.length+5}" class="sub">No engineers match.</td></tr>`}</tbody>`;
+  // validation + tickets + notes
+  $("checks3").innerHTML=`<thead><tr><th>Check</th><th>Result</th><th>Detail</th></tr></thead><tbody>`+
+    d.checks.map(c=>`<tr><td>${esc(c.name)}</td><td><span class="badge ${c.ok?"pass":"fail"}">${c.ok?"PASS":"FAIL"}</span></td><td class="sub">${esc(c.detail)}</td></tr>`).join("")+`</tbody>`;
+  $("tkCount3").textContent="· "+m.tickets.length+" tickets · "+m.tickets.filter(t=>t.result.startsWith("Excluded")).length+" excluded";
+  $("tk3").innerHTML=`<thead><tr><th>Case</th><th>Account</th><th>Owner (POD)</th><th>Week</th><th>Reopen date (IST)</th><th>Result</th><th>Customer comment</th></tr></thead><tbody>`+
+    m.tickets.map(t=>{const bg=t.result.startsWith("Excluded")?"rgba(255,214,0,.20)":t.result.includes("override")?"rgba(46,204,113,.22)":"";
+      return`<tr style="${bg?"background-color:"+bg:""}"><td>${esc(t.case)}</td><td>${esc(t.account)}</td><td>${esc(t.owner)} (${esc(t.owner_pod)})</td><td>${esc(fmtMD(t.week))}</td><td>${esc(t.reopen_time)}</td><td>${esc(t.result)}</td><td>${esc(t.comment)}</td></tr>`}).join("")+`</tbody>`;
+  $("notes3").innerHTML=d.notes.map(x=>`<li>${esc(x)}</li>`).join("")+`<li>Overrides found in this window: ${esc(d.overrides_found.join(", ")||"none")}.</li>`;
+  enhance3();
+}
+function enhance3(){
+  if(!S3.data)return;
+  document.querySelectorAll("#kpis3 .big").forEach(countUp);
+  const heat=(tbl,cols,rgb)=>{const rs=[...$(tbl).querySelectorAll("tbody tr:not(.ph)")].filter(r=>r.children.length>3);
+    cols.forEach(ci=>{let mx=1;rs.forEach(r=>mx=Math.max(mx,parseFloat(r.children[ci].textContent)||0));
+      rs.forEach(r=>{const v=parseFloat(r.children[ci].textContent)||0;r.children[ci].style.backgroundColor=`rgba(var(${rgb}),${(.05+.30*v/mx).toFixed(2)})`})})};
+  const w=$("weekly3"),hs=[...w.querySelectorAll("thead th")];hs[3].style.color="var(--warn)";hs[4].style.color="var(--mut)";hs[5].style.color="rgb(var(--bad-rgb))";
+  w.querySelectorAll("tbody tr").forEach(r=>{r.children[3].style.color="var(--warn)";r.children[4].style.color="var(--mut)";r.children[5].style.color="rgb(var(--bad-rgb))"});
+  heat("weekly3",[5,6],"--bad-rgb");
+  heat("pod3",[3,4],"--bad-rgb");
+  document.querySelectorAll("#pod3 tbody tr,#podwk3 tbody tr").forEach(tr=>{const c=podc(tr.dataset.pod);tr.firstElementChild.style.color=c;tr.firstElementChild.style.boxShadow=`inset 4px 0 0 ${c}`;tr.firstElementChild.style.fontWeight="700"});
+  const by={};S3.data.engineers.forEach(e=>by[e.id]=e);
+  heat("eng3",[3,4],"--bad-rgb");
+  document.querySelectorAll("#eng3 tbody tr:not(.ph)").forEach(tr=>decorateRow(tr,by));
+  $("eng3").querySelectorAll("tr.ph").forEach(tintPod);
+}
+function openEng3(id){
+  const e=S3.data.engineers.find(x=>x.id===id);if(!e)return;
+  const m=model3(),o=m.all.find(x=>x.id===id)||{sw:[],rw:[],so:0,rr:[0,0,0]},mine=S3.data.tickets.filter(t=>t.owner_email===id);
+  $("mbox").innerHTML=`<div class="mh"><div><h3><span class="av" style="width:30px;height:30px;font-size:12px;background:${rgba(podc(e.pod),.22)};color:${podc(e.pod)}">${esc(ini(e.name))}</span>${esc(e.name)} <span class="pod">${esc(e.pod)}</span></h3><div class="sub">${esc(e.email)}</div></div><button id="mclose">Close ✕</button></div>
+   <div class="stats"><div><b>${n(o.so)}</b><span class="sub">Solved</span></div><div><b style="color:var(--warn)">${o.rr[0]}</b><span class="sub">Reopened before excl.</span></div><div><b style="color:var(--mut)">${o.rr[1]}</b><span class="sub">Excluded as closure</span></div>
+   <div><b style="color:rgb(var(--bad-rgb))">${o.rr[2]}</b><span class="sub">Reopened</span></div><div><b>${pct3(o.rr[2],o.so)}</b><span class="sub">Reopen %</span></div></div>
+   <table><thead><tr><th>Week</th><th>Solved</th><th>Reopened</th><th>Reopen %</th></tr></thead><tbody>`+
+   m.weeks.map((w,i)=>`<tr><td>${esc(weekLabel(w))}</td><td>${o.sw[i]??0}</td><td class="b">${o.rw[i]?o.rw[i][2]:0}</td><td>${pct3(o.rw[i]?o.rw[i][2]:0,o.sw[i]??0)}</td></tr>`).join("")+
+   `</tbody></table><h3 style="font-size:14px;margin:16px 0 6px">Reopened tickets (${mine.length})</h3><div class="wrap">`+(mine.length?`<table><thead><tr><th>Case</th><th>Account</th><th>Reopen date (IST)</th><th>Result</th><th>Customer comment</th></tr></thead><tbody>`+
+   mine.map(t=>`<tr style="${t.result.startsWith("Excluded")?"background-color:rgba(255,214,0,.20)":t.result.includes("override")?"background-color:rgba(46,204,113,.22)":""}"><td>${esc(t.case)}</td><td>${esc(t.account)}</td><td>${esc(t.reopen_time)}</td><td>${esc(t.result)}</td><td style="white-space:normal">${esc(t.comment)}</td></tr>`).join("")+`</tbody></table>`:'<div class="sub">None in this window.</div>')+`</div>`;
+  $("modal").style.display="flex";
+}
+$("weekSel3").onchange=ev=>{S.week=ev.target.value===""?null:+ev.target.value;render()};
+$("podSeg3").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;S.pods.clear();if(b.dataset.p)S.pods.add(b.dataset.p);render()};
+$("q3").oninput=ev=>{S3.q=ev.target.value.trim().toLowerCase();render3()};
+$("weekly3").onclick=ev=>{const tr=ev.target.closest("tbody tr");if(!tr)return;const i=+tr.dataset.w;S.week=S.week===i?null:i;render()};
+$("eng3").onclick=ev=>{const h=ev.target.closest("th.s3");if(!h)return;const k=h.dataset.k;S3.sort=S3.sort.k===k?{k,d:-S3.sort.d}:{k,d:(k==="name"||k==="pod")?1:-1};render3()};
+$("moreBtn3").onclick=()=>{const m=$("more3"),sh=m.style.display==="none";m.style.display=sh?"":"none";$("moreBtn3").textContent=sh?"Hide validation list & notes":"Show validation list & notes"};
+
+/* ================= look & feel layer ================= */
+const PODC={"POD-1":"#5b8cff","POD-2":"#b36bff","POD-3":"#2fc4a5","POD-4":"#ff9f43"},PALETTE=["#5b8cff","#b36bff","#2fc4a5","#ff9f43","#ff6b8b","#46c2ff"];
+const podc=p=>PODC[p]||PALETTE[Math.abs([...String(p)].reduce((a,c)=>a+c.charCodeAt(0),0))%PALETTE.length];
+const rgba=(h,a)=>{const v=parseInt(h.slice(1),16);return `rgba(${v>>16&255},${v>>8&255},${v&255},${a})`};
+const ini=nm=>String(nm).split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join("");
+const num=td=>+String(td.textContent).replace(/[,%]/g,"")||0;
+function setTheme(t){document.documentElement.setAttribute("data-theme",t);try{localStorage.setItem("theme",t)}catch(e){}
+  $("theme").textContent=t==="light"?"☾ Dark mode":"☀ Light mode"}
+$("theme").onclick=()=>setTheme(document.documentElement.getAttribute("data-theme")==="light"?"dark":"light");
+setTheme(document.documentElement.getAttribute("data-theme")||"dark");
+
+function decorateRow(tr,lookup){
+  const nm=tr.querySelector(".name[data-e]");if(!nm)return;
+  const e=lookup[nm.dataset.e];tr.dataset.r=nm.dataset.e;tr.classList.toggle("pin",S.pin.has(nm.dataset.e));
+  if(e&&!tr.querySelector(".av")){const a=document.createElement("span");a.className="av";a.textContent=ini(e.name);
+    a.style.background=rgba(podc(e.pod),.22);a.style.color=podc(e.pod);nm.parentNode.insertBefore(a,nm)}
+}
+function tintPod(tr){
+  const col=podc(tr.dataset.pod),t=rgba(col,.15);
+  [...tr.children].forEach((td,i)=>{td.style.backgroundColor=i?t:"var(--card)";if(!i)td.style.backgroundImage=`linear-gradient(${t},${t})`});
+  const f=tr.firstElementChild;f.style.boxShadow=`inset 4px 0 0 ${col}`;f.style.color=col;
+}
+function bar(td,v,mx,rgb){const p=Math.round(100*v/(mx||1));td.style.backgroundImage=`linear-gradient(90deg,rgba(var(${rgb}),.32) ${p}%,transparent ${p}%)`}
+function countUp(el){
+  const raw=el.textContent,t=parseFloat(raw.replace(/[,%]/g,""));if(isNaN(t))return;
+  const dec=(raw.split(".")[1]||"").replace(/\D/g,"").length,suf=raw.includes("%")?"%":"",from=+el.dataset.prev||0,t0=performance.now();
+  el.dataset.prev=t;
+  (function step(now){const k=Math.min(1,(now-t0)/450),v=from+(t-from)*(1-Math.pow(1-k,3));
+    el.textContent=(dec?v.toFixed(dec):Math.round(v).toLocaleString())+suf;if(k<1)requestAnimationFrame(step)})(t0);
+}
+function enhance1(){
+  if(!M)return;
+  const by={};M.every.forEach(e=>by[e.id]=e);
+  document.querySelectorAll("#chips .chip[data-p]").forEach(c=>{const p=c.dataset.p;if(!p)return;const col=podc(p);
+    c.style.borderTop="3px solid "+col;const v=c.querySelector(".v");if(v)v.style.color=col;const b=c.querySelector(".pbar i");if(b)b.style.background=col});
+  // weekly summary
+  const wk=$("weekly"),hs=[...wk.querySelectorAll("thead th")],rows=[...wk.querySelectorAll("tbody tr")],L=hs.length-1;
+  hs.slice(3,L).forEach(th=>th.style.color=podc(th.textContent.trim()));
+  hs[1].style.color="var(--acc)";hs[2].style.color="var(--warn)";
+  let mp=1,mt=1;rows.forEach(tr=>{[...tr.children].slice(3,L).forEach(td=>mp=Math.max(mp,num(td)));mt=Math.max(mt,num(tr.children[L]))});
+  rows.forEach(tr=>{const c=tr.children;c[1].style.color="var(--acc)";c[2].style.color="var(--warn)";
+    c[L].style.backgroundColor=`rgba(var(--acc-rgb),${(.05+.28*num(c[L])/mt).toFixed(2)})`;
+    [...c].slice(3,L).forEach((td,i)=>td.style.backgroundColor=rgba(podc(hs[3+i].textContent.trim()),(.04+.32*num(td)/mp).toFixed(2)))});
+  const tf=wk.querySelector("tfoot tr");if(tf){tf.children[1].style.color="var(--acc)";tf.children[2].style.color="var(--warn)"}
+  // per-engineer
+  const eng=$("eng"),er=[...eng.querySelectorAll("tbody tr:not(.ph)")];let mx=1;
+  er.forEach(tr=>{if(tr.children.length>1)mx=Math.max(mx,num(tr.children[tr.children.length-2]))});
+  er.forEach(tr=>{if(tr.children.length<2)return;const c=tr.children,t=c[c.length-2];bar(t,num(t),mx,"--acc-rgb");t.style.fontWeight="700";decorateRow(tr,by)});
+  eng.querySelectorAll("tr.ph").forEach(tintPod);
+  // heatmap
+  const h=$("heat");
+  h.querySelectorAll("tbody tr:not(.ph)").forEach(tr=>decorateRow(tr,by));
+  h.querySelectorAll("tr.ph").forEach(tintPod);
+  h.querySelectorAll("tr").forEach(tr=>{const c=tr.children;if(c.length>6){c[c.length-4].style.color="var(--acc)";c[c.length-3].style.color="var(--warn)"}});
+}
+function enhance2(){
+  if(!S2.data)return;
+  const by={};S2.data.engineers.forEach(e=>by[e.id]=e);
+  document.querySelectorAll("#kpis2 .big").forEach(countUp);
+  const wk=$("weekly2"),hs=[...wk.querySelectorAll("thead th")],rows=[...wk.querySelectorAll("tbody tr")];
+  hs[1].style.color="var(--acc)";hs[2].style.color="var(--asst)";
+  let mo=1,ma=1;rows.forEach(tr=>{mo=Math.max(mo,num(tr.children[1]));ma=Math.max(ma,num(tr.children[2]))});
+  rows.forEach(tr=>{const c=tr.children;c[1].style.backgroundColor=`rgba(var(--acc-rgb),${(.05+.28*num(c[1])/mo).toFixed(2)})`;c[1].style.color="var(--acc)";c[1].style.fontWeight="700";
+    c[2].style.backgroundColor=`rgba(var(--asst-rgb),${(.05+.28*num(c[2])/ma).toFixed(2)})`;c[2].style.color="var(--asst)";c[2].style.fontWeight="700"});
+  const t=$("eng2"),hr=[...t.querySelectorAll("thead tr")];
+  if(hr[1])[...hr[1].children].forEach((th,i)=>th.style.color=i%2===0?"var(--acc)":"var(--asst)");
+  const er=[...t.querySelectorAll("tbody tr:not(.ph)")].filter(tr=>tr.children.length>2);let mO=1,mA=1;
+  er.forEach(tr=>{const c=tr.children;mO=Math.max(mO,num(c[c.length-2]));mA=Math.max(mA,num(c[c.length-1]))});
+  er.forEach(tr=>{const c=[...tr.children];
+    c.slice(1).forEach((td,i)=>{td.style.color=i%2===0?"var(--acc)":"var(--asst)"});
+    const o=c[c.length-2],a=c[c.length-1];bar(o,num(o),mO,"--acc-rgb");bar(a,num(a),mA,"--asst-rgb");decorateRow(tr,by)});
+  t.querySelectorAll("tr.ph").forEach(tintPod);
+}
+function openEng2(id){
+  const e=S2.data.engineers.find(x=>x.id===id);if(!e)return;
+  const m=model2(),o=m.all.find(x=>x.id===id)||{ow:[],as:[]},tot=a=>a.reduce((x,y)=>x+y,0);
+  const mine=S2.data.tickets.filter(t=>t.engineer_email===id),others=S2.data.tickets.filter(t=>t.owner===e.name);
+  const tk=a=>a.length?`<table><thead><tr><th>Case</th><th>Account</th><th>Date</th><th>${a===mine?"Owner (POD)":"Assisted by (POD)"}</th><th>Why it counted</th></tr></thead><tbody>`+
+    a.map(t=>`<tr><td>${esc(t.case)}</td><td>${esc(t.account)}</td><td>${esc(t.date)}</td><td>${a===mine?esc(t.owner)+" ("+esc(t.owner_pod)+")":esc(t.engineer)+" ("+esc(t.engineer_pod)+")"}</td><td>${esc(t.reasons.join(" + "))}</td></tr>`).join("")+`</tbody></table>`:'<div class="sub">None in this window.</div>';
+  $("mbox").innerHTML=`<div class="mh"><div><h3><span class="av" style="width:30px;height:30px;font-size:12px;background:${rgba(podc(e.pod),.22)};color:${podc(e.pod)}">${esc(ini(e.name))}</span>${esc(e.name)} <span class="pod">${esc(e.pod)}</span></h3><div class="sub">${esc(e.email)}</div></div><button id="mclose">Close ✕</button></div>
+   <div class="stats"><div><b style="color:var(--acc)">${tot(o.ow)}</b><span class="sub">Owner</span></div><div><b style="color:var(--asst)">${tot(o.as)}</b><span class="sub">Assisted</span></div>
+   <div><b>${mine.length}</b><span class="sub">Tickets assisted</span></div><div><b>${others.length}</b><span class="sub">Own tickets assisted by others</span></div></div>
+   <table><thead><tr><th>Week</th><th>Owner</th><th>Assisted</th></tr></thead><tbody>`+
+   m.weeks.map((w,i)=>`<tr><td>${esc(weekLabel(w))}</td><td style="color:var(--acc);font-weight:700">${o.ow[i]??0}</td><td style="color:var(--asst);font-weight:700">${o.as[i]??0}</td></tr>`).join("")+
+   `</tbody></table><h3 style="font-size:14px;margin:16px 0 6px">Tickets this engineer assisted (${mine.length})</h3><div class="wrap">${tk(mine)}</div>
+   <h3 style="font-size:14px;margin:16px 0 6px">Their own tickets assisted by others (${others.length})</h3><div class="wrap">${tk(others)}</div>`;
+  $("modal").style.display="flex";
+}
+// extra interactions: row pin, heat-cell click, expand/collapse, keyboard
+document.addEventListener("click",ev=>{
+  const ac=ev.target.closest("[data-act]");
+  if(ac){const all=(S.tab===2&&S2.data?S2.data.pods:(S.data?S.data.pods:[]));S.col=ac.dataset.act==="col"?new Set(all):new Set();render();return}
+  const cell=ev.target.closest("#heat td.c");if(cell){openEng(cell.dataset.e);return}
+  const tr=ev.target.closest("tr[data-r]");
+  if(tr&&!ev.target.closest(".name,th,button")){const id=tr.dataset.r;S.pin.has(id)?S.pin.delete(id):S.pin.add(id);
+    document.querySelectorAll(`tr[data-r="${CSS.escape(id)}"]`).forEach(x=>x.classList.toggle("pin",S.pin.has(id)))}
+});
+document.addEventListener("keydown",ev=>{
+  if(ev.key==="/"&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)){ev.preventDefault();($(S.tab===3?"q3":S.tab===2?"q2":"q")).focus()}
+});
+
 load(false,true);
-setInterval(()=>load(false,!S.custom),5*60*1000);
+setInterval(()=>{load(false,!S.custom);reloadActive(false)},5*60*1000);
 // background tabs throttle timers: refresh as soon as the tab is visible again if data is older than 5 min
 document.addEventListener("visibilitychange",()=>{
-  if(document.visibilityState==="visible"&&S.data&&Date.now()-new Date(S.data.generated_at).getTime()>5*60*1000)load(false,!S.custom)});
+  if(document.visibilityState==="visible"&&S.data&&Date.now()-new Date(S.data.generated_at).getTime()>5*60*1000){load(false,!S.custom);reloadActive(false)}});
 </script>
 </body>
 </html>
