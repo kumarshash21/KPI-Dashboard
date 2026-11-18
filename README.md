@@ -36,3 +36,6 @@ zebra rows, hover highlight, click a row to pin it, click a heatmap cell or name
 (several = ONE ticket, dated by the LAST one, IST). Closure exclusion = rule-based text test of the last customer CaseComment before the reopen.
 Manual overrides (always counted): `reopen_overrides` in config.json. Needs read access to CaseHistory and CaseComment for the Run As user,
 and `pip3 install -r requirements.txt` (adds openpyxl for the Excel file).
+
+## Tab 4 - First Response
+Reads Salesforce CaseMilestone (type "First Response": met / missed / open) for Software cases created in the window, split into CritSit (Sev1/2 >= 50%), Sev2 (< 50%), Sev3 and Customer-scope buckets by Technical Impact Area. Field API names are set under `fr` in config.json (Severity__c, Impact_Percentage__c, Technical_Impact_Area__c are placeholders): open http://localhost:4173/api/fr-fields to see the real names and the milestone type names, fix config.json, restart.

@@ -12,14 +12,14 @@ Inputs implemented (Owner by End Time):
   * Non-roster = all-owner count - roster total; top owners via GROUP BY Owner.Name.
   * Dating = End Time only; current owner only; each case once; IST day/week buckets (Sun-Sat).
 """
-import base64, csv, hmac, json, os, random, threading, time, urllib.error, urllib.parse, urllib.request
+import base64, csv, hmac, json, os, random, ssl, threading, time, urllib.error, urllib.parse, urllib.request
 import datetime as dt
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 BASE = Path(__file__).parent
@@ -37,7 +37,7 @@ app = FastAPI(title="SF Dashboard")
 async def guard(request, call_next):
     """Optional HTTP Basic login (set DASH_USER and DASH_PASSWORD in .env) + never cache pages/API data."""
     user, pw = os.getenv("DASH_USER", ""), os.getenv("DASH_PASSWORD", "")
-    if user and pw:
+    if user and pw and request.url.path != "/healthz":
         ok, h = False, request.headers.get("authorization", "")
         if h.lower().startswith("basic "):
             try:
@@ -46,7 +46,6 @@ async def guard(request, call_next):
             except Exception:
                 ok = False
         if not ok:
-            from starlette.responses import Response
             return Response("Login required", status_code=401, headers={"WWW-Authenticate": 'Basic realm="Support Dashboard"'})
     resp = await call_next(request)
     resp.headers["Cache-Control"] = "no-store, max-age=0"
@@ -54,6 +53,11 @@ async def guard(request, call_next):
 
 _cache = {}
 _roster_cache = {}
+
+
+@app.get("/healthz")
+def healthz():
+    return {"ok": True}
 
 
 # ---------- salesforce via OAuth 2.0 Client Credentials + REST API ----------
@@ -80,10 +84,21 @@ _tok = {"v": None, "inst": None, "ts": 0.0}
 _tok_lock = threading.Lock()
 
 
+def _ssl_ctx():
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except Exception:
+        return ssl.create_default_context()
+
+
+_SSL = _ssl_ctx()
+
+
 def _http(method, url, data=None, headers=None, timeout=120):
     req = urllib.request.Request(url, data=data, headers=headers or {}, method=method)
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with urllib.request.urlopen(req, timeout=timeout, context=_SSL) as r:
             return r.status, json.loads(r.read().decode() or "null")
     except urllib.error.HTTPError as e:
         body = e.read().decode(errors="replace")
@@ -163,10 +178,17 @@ def base_where():
     return CFG.get("soql_where") or "Id != null"
 
 
+def combo_not(prefix=""):
+    """Compound exclusions from config 'exclude_combo', e.g. exclude tickets that are Severity 4 AND Type = Feature Request."""
+    # SOQL rejects "AND NOT (...)", so use De Morgan: NOT (a AND b) == (a' OR b')
+    return ["(" + " OR ".join(c_not(prefix + x["field"], x["values"]) for x in r["all"]) + ")" for r in CFG.get("exclude_combo", [])]
+
+
 def filters_where():
     parts = [base_where()]
     parts += [c_in(r["field"], r["values"]) for r in CFG.get("include", [])]
     parts += [c_not(r["field"], r["values"]) for r in CFG.get("exclude", [])]
+    parts += combo_not()
     return " AND ".join(parts)
 
 
@@ -341,6 +363,7 @@ def mock_rows(s, e, entries):
                     F["type"]: rnd.choices(["Incident", "Service Request", "Query", "Alert"], [6, 1.5, 1, 1.5])[0],
                     F["owner_id"]: oid, "Owner": {"Name": oname}, "Account": {"Name": f"Customer {(len(rows) * 7) % 40 + 1}"},
                     F["end_time"]: t.strftime("%Y-%m-%dT%H:%M:%S.000+0000"),
+                    "RecordType": {"Name": rnd.choices(["Ticket Form", "IM Ticket"], [9, 1])[0]},
                 })
         d += dt.timedelta(days=1)
     return rows
@@ -352,6 +375,9 @@ def passes(rec):
             return False
     for r in CFG.get("exclude", []):
         if dget(rec, r["field"]) in r["values"]:
+            return False
+    for r in CFG.get("exclude_combo", []):
+        if all(dget(rec, x["field"]) in x["values"] for x in r["all"]):
             return False
     return True
 
@@ -536,7 +562,7 @@ def assisted_collect_live(s, e, entries, idmap, slices):
         a, b = utc_bounds(*sl)
         pf = " AND ".join(["Parent." + base_where()]
                           + [c_in("Parent." + r["field"], r["values"]) for r in CFG.get("include", [])]
-                          + [c_not("Parent." + r["field"], r["values"]) for r in CFG.get("exclude", [])])
+                          + [c_not("Parent." + r["field"], r["values"]) for r in CFG.get("exclude", [])] + combo_not("Parent."))
         return sf_query(f"SELECT ParentId, MemberId, TeamRoleId FROM CaseTeamMember WHERE {pf} "
                         f"AND Parent.{F['end_time']} >= {a.strftime(fmt)} AND Parent.{F['end_time']} < {b.strftime(fmt)} "
                         f"AND MemberId IN ({idl})")
@@ -822,7 +848,7 @@ def reopen_phase1_live(s, e, idmap, slices):
     a, b = utc_bounds(s, e)
     flt, idl = filters_where(), id_list(ids)
     cf = " AND ".join(["Case." + base_where()] + [c_in("Case." + r["field"], r["values"]) for r in CFG.get("include", [])]
-                      + [c_not("Case." + r["field"], r["values"]) for r in CFG.get("exclude", [])]) + f" AND Case.{F['owner_id']} IN ({idl})"
+                      + [c_not("Case." + r["field"], r["values"]) for r in CFG.get("exclude", [])] + combo_not("Case.")) + f" AND Case.{F['owner_id']} IN ({idl})"
     fmt = "%Y-%m-%dT%H:%M:%SZ"
 
     def pop_slice(sl):  # STEP 1: population (same case IDs as Tabs 1 and 2)
@@ -1131,6 +1157,389 @@ def api_reopened_xlsx(start: str = None, end: str = None):
         raise HTTPException(501, "Excel export needs openpyxl: run  pip3 install -r requirements.txt  and restart.")
     return Response(body, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     headers={"Content-Disposition": 'attachment; filename="reopened_tickets.xlsx"'})
+
+
+
+# =====================================================================
+# Tab 4: First Response (FR) milestone tracking
+# Source: Salesforce CaseMilestone (milestone type "First Response"): IsViolated / IsCompleted / StartDate / CompletionDate / TargetResponseInMins
+# Buckets (config.json -> "fr"):
+#   crit  = Severity 1-2 and Impact >= 50%, GreyOrange scope
+#   sev2  = Severity 2 and Impact < 50%,   GreyOrange scope
+#   sev3  = Severity 3,                    GreyOrange scope
+#   cust  = Customer scope Sev1-4 (Technical Impact Area in the customer-scope list) + GreyOrange scope Sev4
+# =====================================================================
+import statistics
+FRC = CFG.get("fr", {})
+FRF = FRC.get("fields", {"severity": "Severity__c", "impact": "Impact_Percentage__c", "tia": "Technical_Impact_Area__c"})
+FR_BUCKETS = [("crit", "CritSit · Sev1/Sev2 ≥ 50%", "Excl. Customer Scope"), ("sev2", "Sev2 · < 50%", "Excl. Customer Scope"),
+              ("sev3", "Non-CritSit · Sev3", "Excl. Customer Scope"), ("cust", "Customer Sev1–4 · GreyOrange Sev4", "Customer scope Sev1–4 + GreyOrange scope Sev4")]
+
+
+def _norm(s):
+    return " ".join(str(s or "").lower().split())
+
+
+def fr_scope(tia):
+    cs = {_norm(x) for x in FRC.get("customer_scope", [])}
+    return "customer" if _norm(tia) in cs else "go"
+
+
+def _num(v):
+    m = re.search(r"-?\d+(?:\.\d+)?", str(v if v is not None else ""))
+    return float(m.group()) if m else None
+
+
+def fr_bucket(sev, imp, scope):
+    if sev not in (1, 2, 3, 4):
+        return None
+    if scope == "customer" or sev == 4:  # customer scope (any Sev1-4) + GreyOrange-scope Sev4
+        return "cust"
+    thr = FRC.get("crit_impact_pct", 50)
+    if sev in (1, 2) and imp is not None and imp >= thr:
+        return "crit"
+    if sev == 2 and imp is not None and imp < thr:
+        return "sev2"
+    if sev == 3:
+        return "sev3"
+    return None  # Sev1 below threshold, Sev2 without impact: not part of any definition
+
+
+def fr_where_cases():
+    return " AND ".join(["Id != null"] + [c_in(r["field"], r["values"]) for r in FRC.get("include", [])])
+
+
+_resf = {}
+
+
+def res_field():
+    """API name of the Case field 'Resolution Time (min)': fr.fields.resolution in config.json, otherwise found by label."""
+    cfgv = (FRF.get("resolution") or "").strip()
+    if cfgv or MOCK:
+        return cfgv or "Resolution_Time_Min__c"
+    if "n" not in _resf:
+        d = sf_get(f"/services/data/{sf_env()['ver']}/sobjects/Case/describe")
+        cands = [x for x in d["fields"] if "resolution" in x["label"].lower() and "time" in x["label"].lower()]
+        pick = next((x for x in cands if "min" in x["label"].lower() or "min" in x["name"].lower()), cands[0] if cands else None)
+        if not pick:
+            raise HTTPException(500, "Could not find a Case field labelled 'Resolution Time (min)'. Put its API name in config.json -> fr.fields.resolution "
+                                     "(see /api/fr-fields for candidates).")
+        _resf["n"] = pick["name"]
+    return _resf["n"]
+
+
+def fr_collect_live(s, e, idmap, slices, mname=None, extra=None):
+    """Population = exactly the Solved-Tickets population (same filters, End Time window, roster owners), then the First Response milestone for those cases."""
+    flt, idl = filters_where(), id_list(list(idmap))
+    sel = (f"SELECT Id, CaseNumber, CreatedDate, {F['type']}, {F['owner_id']}, Account.Name, {F['end_time']}, "
+           f"{FRF['severity']}, {FRF['impact']}, {FRF['tia']}{', ' + extra if extra else ''} FROM {CFG['object']}")
+
+    def pop(sl):
+        x, y = utc_bounds(*sl)
+        try:
+            return sf_query(f"{sel} WHERE {flt} AND {time_cond(x, y)} AND {F['owner_id']} IN ({idl}) ORDER BY {F['end_time']}")
+        except HTTPException as ex:
+            raise HTTPException(500, f"{ex.detail}  -- Check the field names under 'fr' in config.json (open /api/fr-fields).")
+
+    def ms(ids):
+        return sf_query("SELECT CaseId, StartDate, CompletionDate, IsCompleted, IsViolated, TargetResponseInMins FROM CaseMilestone "
+                        f"WHERE MilestoneType.Name = {sq(mname or FRC.get('milestone', 'First Response'))} AND CaseId IN ({id_list(ids)})")
+
+    with ThreadPoolExecutor(max_workers=5) as ex:
+        cases = _flat(ex.map(pop, slices)) if idmap else []
+        ids = [c["Id"] for c in cases]
+        mrows = _flat(ex.map(ms, _chunks(ids, 150))) if ids and not extra else []
+    return cases, mrows
+
+
+def fr_collect_mock(s, e, idmap, entries, slices, kind="fr"):
+    rnd = random.Random(11)
+    cases = [r for r in mock_rows(s, e, entries) if passes(r) and dget(r, F["owner_id"]) in idmap and s <= parse_ist(dget(r, F["end_time"])) <= e]
+    tia_vals = ["Hardware Fault", "Software Bug", "Config Issue", None] + FRC.get("customer_scope", [])[:4]
+    mrows, f = [], "%Y-%m-%dT%H:%M:%S.000+0000"
+    for c in cases:
+        sev = rnd.choices([1, 2, 3, 4], [10, 35, 40, 15])[0]
+        c[FRF["severity"]], c[FRF["impact"]] = f"Severity {sev}", (rnd.choice([10, 30, 50, 60, 80, 100]) if sev <= 2 else None)
+        c[FRF["tia"]] = rnd.choice(tia_vals)
+        end = _pdt(dget(c, F["end_time"]))
+        created = end - dt.timedelta(hours=rnd.randint(2, 70))
+        c["CreatedDate"] = created.strftime(f)
+        if kind == "res":
+            tg = {1: 60, 2: 90, 3: 1440, 4: 1440}[sev]
+            c[res_field()] = None if rnd.random() < .04 else max(5, round(rnd.gauss(tg * .85, tg * .45), 1))
+            continue
+        if rnd.random() < .05:
+            continue  # no FR milestone on this case
+        tgt = {1: 15, 2: 30, 3: 60, 4: 120}[sev]
+        frm = max(1, int(rnd.gauss(tgt * .8, tgt * .5)))
+        if kind == "res":
+            tgt = {1: 60, 2: 90, 3: 1440, 4: 1440}[sev]
+            frm = max(5, int(rnd.gauss(tgt * .85, tgt * .45)))
+        mrows.append({"CaseId": c["Id"], "StartDate": created.strftime(f), "CompletionDate": (created + dt.timedelta(minutes=frm)).strftime(f),
+                      "IsCompleted": True, "IsViolated": frm > tgt, "TargetResponseInMins": tgt})
+    return cases, mrows
+
+
+def _pdt(ts):
+    return dt.datetime.strptime(ts.replace("Z", "+0000"), "%Y-%m-%dT%H:%M:%S.%f%z") if ts else None
+
+
+def fr_summarize(start=None, end=None, kind="fr"):
+    RES = kind == "res"
+    label = "Resolution" if RES else "First Response"
+    if start and end:
+        s, e = dt.date.fromisoformat(start), dt.date.fromisoformat(end)
+    else:
+        s, e = rolling_window()
+    entries, idmap, report = resolve_roster()
+    slices = week_slices(s, e)
+    cases, mrows = fr_collect_mock(s, e, idmap, entries, slices, kind) if MOCK else fr_collect_live(s, e, idmap, slices, None, res_field() if RES else None)
+    mmap, dup_ms = {}, 0
+    for m in mrows:
+        if m["CaseId"] in mmap:
+            dup_ms += 1
+        mmap[m["CaseId"]] = m
+    tickets, seen, dupes, outside, unclass, nomile, miss_sev, miss_imp = [], set(), 0, 0, 0, 0, 0, 0
+    for c in cases:
+        cid = c["Id"]
+        if cid in seen:
+            dupes += 1
+            continue
+        seen.add(cid)
+        d = parse_ist(dget(c, F["end_time"]))
+        if not (s <= d <= e):
+            outside += 1
+            continue
+        own = idmap.get(dget(c, F["owner_id"]))
+        if not own:
+            continue
+        sv = _num(dget(c, FRF["severity"]))
+        sev = int(sv) if sv is not None else None
+        imp = _num(dget(c, FRF["impact"]))
+        tia = dget(c, FRF["tia"])
+        scope = fr_scope(tia)
+        if sev is None:
+            miss_sev += 1
+        if sev in (1, 2) and imp is None and scope == "go":
+            miss_imp += 1
+        b = fr_bucket(sev, imp, scope)
+        m = mmap.get(cid)
+        created = _pdt(dget(c, "CreatedDate"))
+        out, mins, tgt = "none", None, None
+        if RES:
+            rv = _num(dget(c, res_field()))
+            ov = FRC.get("resolution_target_minutes", {}).get(b) if b else None
+            if rv is None:
+                nomile += 1
+            else:
+                mins, tgt = round(rv, 4), ov
+                out = ("met" if mins < ov else "missed") if ov else "none"
+        elif m:
+            tgt = m.get("TargetResponseInMins")
+            st = _pdt(m.get("StartDate")) or created
+            cp = _pdt(m.get("CompletionDate"))
+            if m.get("IsCompleted") and cp:
+                out, mins = ("missed" if m.get("IsViolated") else "met"), round((cp - st).total_seconds() / 60, 4)
+            elif m.get("IsViolated"):
+                out = "missed"
+            else:
+                out = "open"
+            ov = (FRC.get("resolution_target_minutes", {}) if RES else FRC.get("target_minutes", {})).get(b)
+            if ov:  # fixed target for this bucket (e.g. 2 h): judge by FR time instead of the milestone's own flag
+                tgt = ov
+                if mins is not None:
+                    out = "met" if mins <= ov else "missed"
+                elif (dt.datetime.now(UTC) - st).total_seconds() / 60 > ov:
+                    out = "missed"
+                else:
+                    out = "open"
+        else:
+            nomile += 1
+        if b is None:
+            unclass += 1
+        tickets.append({"case": dget(c, "CaseNumber"), "account": dget(c, "Account.Name") or "", "owner": own["name"], "pod": own["pod"],
+                        "sev": sev, "impact": imp, "tia": tia or "(blank)", "scope": scope, "bucket": b or "none",
+                        "created": created.astimezone(TZ).strftime("%Y-%m-%d %H:%M") if created else "", "end": d.isoformat(), "date": d.isoformat(),
+                        "type": dget(c, F["type"]) or "", "target": tgt, "fr_min": mins, "outcome": out})
+    pods = sorted({en["pod"] for en in entries})
+    weeks = [{"from": a.isoformat(), "to": b.isoformat(), "partial": a.weekday() != 6 or b.weekday() != 5} for a, b in slices]
+    t1 = None
+    try:
+        if not MOCK:
+            sm = get_summary(start, end)
+            t1 = sum(c[0] + c[1] for x in sm["engineers"] for c in x["days"].values())
+    except Exception:
+        t1 = None
+    out = {"window": {"start": s.isoformat(), "end": e.isoformat()}, "generated_at": dt.datetime.now(TZ).strftime("%Y-%m-%dT%H:%M:%S"), "mock": MOCK,
+           "buckets": [{"key": k, "label": l, "sub": sub} for k, l, sub in FR_BUCKETS], "weeks": weeks, "pods": pods,
+           "total": len(tickets), "solved_tab_total": t1, "no_milestone": nomile, "unclassified": unclass,
+           "tickets": sorted(tickets, key=lambda t: t["created"], reverse=True)}
+    out["checks"] = [
+        {"name": "Ticket count = Solved Tickets tab (roster-owned)", "ok": t1 is None or t1 == len(tickets),
+         "detail": f"{len(tickets)} here vs {t1 if t1 is not None else 'n/a (mock)'} there"},
+        {"name": "Each case counted once", "ok": dupes == 0 and dup_ms == 0, "detail": f"{dupes} duplicate cases, {dup_ms} duplicate milestone rows ignored"},
+        {"name": "Every case dated inside the window", "ok": outside == 0, "detail": f"{outside} outside"},
+        {"name": ("Cases without a Resolution Time (min) value" if RES else "Cases without a First Response milestone"), "ok": nomile == 0, "detail": f"{nomile} (counted in totals, no {label.lower()} time)"},
+        {"name": "Tickets matching none of the 4 definitions", "ok": unclass == 0, "detail": f"{unclass} (Sev1 under 50% impact, Sev2 without impact %, or no severity)"},
+        {"name": "Severity missing", "ok": miss_sev == 0, "detail": f"{miss_sev} tickets"},
+        {"name": "Sev1/2 GreyOrange-scope tickets without Impact %", "ok": miss_imp == 0, "detail": f"{miss_imp} tickets"}]
+    if RES:
+        out["notes"] = ["Population is the same as the Solved Tickets tab: Status = Solved, Category = Software, Record Type = Ticket Form, Type != Alert, roster engineers only (current owner), dated by End Time (IST).",
+                        "Resolution source: Case field 'Resolution Time (min)' (%s), value in minutes. Met = resolution time below the target (strictly less)." % res_field(),
+                        "Resolution targets (met = resolved within target): " + ", ".join(f"{k} = {v} min" for k, v in FRC.get("resolution_target_minutes", {}).items()),
+                        "Customer scope = Technical Impacted Area in: " + "; ".join(FRC.get("customer_scope", [])) + ". Blank or any other value = GreyOrange scope.",
+                        "CritSit Impact threshold = %s%%." % FRC.get("crit_impact_pct", 50)]
+    else:
+        out["notes"] = ["Population is the same as the Solved Tickets tab: Status = Solved, Category = Software, Record Type = Ticket Form (not IM Ticket), Type != Alert, roster engineers only (current owner), dated by End Time (IST).",
+                        "First Response source: Salesforce CaseMilestone '%s'. FR minutes = CompletionDate minus milestone StartDate. Met = completed and not violated; Missed = violated; Open = still running." % FRC.get("milestone", "First Response"),
+                        "Customer scope = Technical Impacted Area in: " + "; ".join(FRC.get("customer_scope", [])) + ". Blank or any other value = GreyOrange scope.",
+                        "CritSit Impact threshold = %s%%." % FRC.get("crit_impact_pct", 50),
+                        "Fixed FR targets: " + ", ".join(f"{k} = {v} min" for k, v in FRC.get("target_minutes", {}).items()) + " (met/missed judged on FR time vs this target); other buckets use the Salesforce milestone result."]
+    return out
+
+
+def get_fr(start=None, end=None, refresh=False, kind="fr"):
+    key = ("FR" if kind == "fr" else "RES", start, end, str(ist_today()))
+    hit = _cache.get(key)
+    if hit and not refresh and time.time() - hit[0] < CFG.get("cache_seconds", 300):
+        return hit[1]
+    data = fr_summarize(start, end, kind)
+    _cache[key] = (time.time(), data)
+    return data
+
+
+@app.get("/api/resolution")
+def api_res(start: str = None, end: str = None, refresh: bool = False):
+    return get_fr(start, end, refresh, "res")
+
+
+@app.get("/api/firstresponse")
+def api_fr(start: str = None, end: str = None, refresh: bool = False):
+    return get_fr(start, end, refresh)
+
+
+# =====================================================================
+# Tab 5: FR Live Tracker (independent of the other tabs)
+# Open tickets (all owners) whose First Response is breached within the last 7 days or will breach within the next 2 hours.
+# due = milestone TargetDate (or StartDate + fixed target for buckets listed in fr.target_minutes). Times are IST in the UI; the browser ticks the countdowns.
+# =====================================================================
+_live = {}
+
+
+def lightning_base():
+    u = (sf_env().get("url") or "").rstrip("/") if not MOCK else "https://greyorangeorg.my.salesforce.com"
+    return u.replace(".my.salesforce.com", ".lightning.force.com")
+
+
+def fr_live_collect(now):
+    fmt = "%Y-%m-%dT%H:%M:%SZ"
+    since = (now - dt.timedelta(days=9)).strftime(fmt)
+    where = " AND ".join([f"MilestoneType.Name = {sq(FRC.get('milestone', 'First Response'))}", "Case.IsClosed = false", c_not("Case.Status", ["Solved"]), f"StartDate >= {since}"]
+                         + [c_in("Case." + r["field"], r["values"]) for r in CFG.get("include", [])]
+                         + [c_not("Case." + r["field"], r["values"]) for r in CFG.get("exclude", [])] + combo_not("Case."))
+    q = (f"SELECT Id, CaseId, StartDate, TargetDate, CompletionDate, IsCompleted, IsViolated, TargetResponseInMins, Case.CaseNumber, Case.CreatedDate, Case.Status, "
+         f"Case.OwnerId, Case.Owner.Name, Case.Account.Name, Case.{FRF['severity']}, Case.{FRF['impact']}, Case.{FRF['tia']} FROM CaseMilestone WHERE {where} ORDER BY StartDate")
+    return sf_query(q)
+
+
+def fr_live_mock(now, entries):
+    rnd = random.Random(int(now.timestamp() // 60))
+    live = [en for en in entries if en["ids"]]
+    f, rows = "%Y-%m-%dT%H:%M:%S.000+0000", []
+    for i in range(46):
+        sev = rnd.choices([1, 2, 3, 4], [10, 30, 45, 15])[0]
+        tgt = {1: 15, 2: 30, 3: 120, 4: 120}[sev]
+        start = now - dt.timedelta(minutes=rnd.choice([rnd.randint(1, tgt * 2), rnd.randint(tgt, 60 * 24 * 6)]))
+        due = start + dt.timedelta(minutes=tgt)
+        done = rnd.random() < .35
+        comp = start + dt.timedelta(minutes=int(tgt * rnd.uniform(.4, 1.8))) if done else None
+        own = rnd.choice(live + [None, None])
+        rows.append({"Id": f"m{i}", "CaseId": f"500LIVE{i:04d}", "StartDate": start.strftime(f), "TargetDate": due.strftime(f), "TargetResponseInMins": tgt,
+                     "CompletionDate": comp.strftime(f) if comp else None, "IsCompleted": done, "IsViolated": bool(comp and comp > due),
+                     "Case": {"CaseNumber": str(310000 + i), "CreatedDate": start.strftime(f), "Status": rnd.choice(["Assigned", "In Progress", "Pending Customer"]),
+                              "OwnerId": own["ids"][0] if own else "005OTHER", "Owner": {"Name": own["name"] if own else "Support Queue"},
+                              "Account": {"Name": rnd.choice(["Acme Retail", "Globex", "Initech", "Umbrella"])},
+                              FRF["severity"]: f"Severity {sev}", FRF["impact"]: rnd.choice([20, 50, 80]) if sev <= 2 else None,
+                              FRF["tia"]: rnd.choice(["Software Bug", "Config Issue", None, "Customer WMS Issue"])}})
+    return rows
+
+
+def fr_live_build():
+    now = dt.datetime.now(UTC)
+    entries, idmap, _ = resolve_roster()
+    rows = fr_live_mock(now, entries) if MOCK else fr_live_collect(now)
+    tmap, out, seen = FRC.get("target_minutes", {}), [], set()
+    horizon, win = now + dt.timedelta(hours=2), now - dt.timedelta(days=7)
+    for r in rows:
+        if r["CaseId"] in seen:
+            continue
+        seen.add(r["CaseId"])
+        c = r.get("Case") or {}
+        sv = _num(c.get(FRF["severity"]))
+        sev = int(sv) if sv is not None else None
+        imp, tia = _num(c.get(FRF["impact"])), c.get(FRF["tia"])
+        scope = fr_scope(tia)
+        b = fr_bucket(sev, imp, scope)
+        st = _pdt(r.get("StartDate"))
+        ov = FRC.get("live_target_minutes", {}).get(str(sev))  # live tracker rule: Sev1/2 = 15 min, Sev3/4 = 2 h, counted from the FR start date
+        tgt = ov or r.get("TargetResponseInMins")
+        due = (st + dt.timedelta(minutes=ov)) if (ov and st) else _pdt(r.get("TargetDate")) or ((st + dt.timedelta(minutes=tgt)) if st and tgt else None)
+        if not due:
+            continue
+        cp = _pdt(r.get("CompletionDate")) if r.get("IsCompleted") else None
+        if cp:
+            if cp <= due or due < win:
+                continue
+            state, late = "late", round((cp - due).total_seconds())
+        elif due <= now:
+            if due < win:
+                continue
+            state, late = "nores", round((now - due).total_seconds())
+        elif due <= horizon:
+            state, late = "soon", None
+        else:
+            continue
+        own = idmap.get(c.get("OwnerId"))
+        if not own:
+            continue  # roster engineers only
+        out.append({"id": r["CaseId"], "case": c.get("CaseNumber"), "account": dget(c, "Account.Name") or "", "owner": own["name"] if own else (dget(c, "Owner.Name") or "(unknown)"),
+                    "pod": own["pod"] if own else "Non-roster", "status": c.get("Status") or "", "bucket": b or "none", "sev": sev, "impact": imp, "tia": tia or "(blank)",
+                    "start": st.astimezone(TZ).strftime("%Y-%m-%d %H:%M:%S") if st else "", "due": due.astimezone(TZ).strftime("%Y-%m-%d %H:%M:%S"), "due_ms": int(due.timestamp() * 1000),
+                    "target": tgt, "state": state, "late_s": late, "done_ms": int(cp.timestamp() * 1000) if cp else None})
+    out.sort(key=lambda t: t["due_ms"])
+    return {"generated_at": dt.datetime.now(TZ).strftime("%Y-%m-%dT%H:%M:%S"), "now_ms": int(now.timestamp() * 1000), "mock": MOCK,
+            "link_base": lightning_base(), "buckets": [{"key": k, "label": l} for k, l, _ in FR_BUCKETS] + [{"key": "none", "label": "Other (no FR bucket)"}], "tickets": out,
+            "notes": ["Open tickets (not Solved/Closed) owned by roster engineers (POD-1 to POD-4), same Software / Ticket Form / not-Alert filters as the other tabs.",
+                      "Breached = First Response not met by its due time in the last 7 days: 'No response yet' (still waiting) or 'Responded late'. Going to breach = no response yet and due within the next 2 hours.",
+                      "Due time = First Response start date + target by severity: Sev1/Sev2 = 15 minutes, Sev3/Sev4 = 2 hours (config: fr.live_target_minutes). Countdown ticks in the browser; data refreshes every minute."]}
+
+
+@app.get("/api/fr-live")
+def api_fr_live(refresh: bool = False):
+    hit = _live.get("d")
+    if hit and not refresh and time.time() - hit[0] < 30:
+        return hit[1]
+    d = fr_live_build()
+    _live["d"] = (time.time(), d)
+    return d
+
+
+@app.get("/api/fr-fields")
+def api_fr_fields():
+    """Helps find the right Case API field names for severity / impact % / technical impact area, and lists milestone types."""
+    d = sf_get(f"/services/data/{sf_env()['ver']}/sobjects/Case/describe")
+    pat = re.compile(r"severity|impact|technical|sla|priority|resolution", re.I)
+    f = [{"name": x["name"], "label": x["label"], "type": x["type"], "values": [v["value"] for v in x["picklistValues"] if v["active"]][:20]}
+         for x in d["fields"] if pat.search(x["name"] + " " + x["label"])]
+    mt = [r["Name"] for r in sf_query("SELECT Name FROM MilestoneType")]
+    tia_all = next((v for x in d["fields"] if x["name"] == FRF["tia"] for v in [[p["value"] for p in x["picklistValues"] if p["active"]]]), [])
+    import difflib
+    match = [{"configured": cs, "exact_match": any(_norm(cs) == _norm(v) for v in tia_all),
+              "closest_in_salesforce": [v for v in tia_all if _norm(v) != _norm(cs)][:0] or difflib.get_close_matches(cs, tia_all, n=2, cutoff=.4)}
+             for cs in FRC.get("customer_scope", [])]
+    return {"configured": FRF, "technical_impact_area_all_values": tia_all, "customer_scope_check": match,
+            "candidate_fields": f, "milestone_types": mt}
+
 
 
 @app.get("/api/fields")

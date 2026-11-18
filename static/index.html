@@ -135,6 +135,34 @@
   #kpis3 .card:nth-child(1) .big{color:var(--acc)}#kpis3 .card:nth-child(2) .big{color:var(--warn)}#kpis3 .card:nth-child(3) .big{color:rgb(var(--bad-rgb))}
   #tk3 td,#tk3 th,#checks3 td{text-align:left;white-space:normal}
   #podwk3 td,#podwk3 th{white-space:nowrap}
+  /* ---- Tab 4: First Response ---- */
+  .frk{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:16px}
+  .frcard{position:relative;overflow:hidden;border-top:4px solid var(--bc,var(--acc))}
+  .frcard .bl{font-weight:700;font-size:13px;color:var(--txt)}.frcard .bs{font-size:11px;color:var(--mut);margin-bottom:8px}
+  .frcard .big{font-size:38px;font-weight:800;line-height:1.05;letter-spacing:-.5px}
+  .frcard .big small{font-size:15px;font-weight:600;margin-left:2px}
+  .frcard.g .big{color:var(--grnt)}.frcard.a .big{color:var(--ambt)}.frcard.r .big{color:var(--redt)}.frcard.na .big{color:var(--mut)}
+  .frcard .row{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-top:6px}.frcard .row b{color:var(--txt)}
+  .frcard .trend{font-size:12px;font-weight:700;margin-top:4px}.trend.up{color:var(--grnt)}.trend.dn{color:var(--redt)}.trend.fl{color:var(--mut)}
+  .frcard .meter{height:6px;border-radius:4px;background:var(--track);margin-top:10px;overflow:hidden;display:flex}.meter i{display:block;height:100%}
+  .m-met{background:#2fc4a5}.m-mis{background:#ff6b8b}.m-op{background:#9a9da6}
+  .frc{padding:5px 9px;border-radius:6px;font-weight:700;text-align:center;white-space:nowrap}
+  .frc small{display:block;font-weight:500;font-size:10.5px;opacity:.85}
+  .frc.g{background:var(--grn);color:var(--grnt)}.frc.a{background:var(--amb);color:var(--ambt)}.frc.r{background:var(--red);color:var(--redt)}.frc.na{color:var(--mut)}
+  .frlg{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin:6px 0 2px}.frlg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  #frChart{width:100%;height:auto;display:block}#frChart text{fill:var(--mut);font-size:11px}
+  .frtag{font-size:11px;padding:1px 7px;border-radius:10px;background:var(--red);color:var(--redt);font-weight:600}
+  .frstrip{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13px;color:var(--mut);margin:0 0 14px}.frstrip b{color:var(--txt);font-size:15px}.okc{font-style:normal;color:var(--grnt);font-weight:600}
+  .livedot{width:10px;height:10px;border-radius:50%;background:#2fc4a5;display:inline-block;box-shadow:0 0 0 0 rgba(47,196,165,.6);animation:lp 1.6s infinite}@keyframes lp{70%{box-shadow:0 0 0 9px rgba(47,196,165,0)}100%{box-shadow:0 0 0 0 rgba(47,196,165,0)}}
+  .cd{font-variant-numeric:tabular-nums;font-weight:800;padding:2px 8px;border-radius:6px}.cd.r{background:var(--red);color:var(--redt)}.cd.a{background:var(--amb);color:var(--ambt)}
+  .frpods{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+  .podc{border:1px solid var(--line);border-left:5px solid var(--pc);border-radius:12px;padding:12px 14px;cursor:pointer;background:var(--card)}
+  .podc:hover{border-color:var(--pc)}.podc.on{outline:2px solid var(--pc);background:rgba(var(--acc-rgb),.08)}
+  .podc .pn{font-weight:800;color:var(--pc)}.podc .pb{font-size:30px;font-weight:800;line-height:1.1;margin:4px 0}.podc .pb small{font-size:12px;font-weight:600;color:var(--mut)}
+  .podc.bad .pb{color:var(--redt)}.podc.warn .pb{color:var(--ambt)}.podc.ok .pb{color:var(--grnt)}
+  .podc .pbar{height:5px;border-radius:3px;background:var(--track);overflow:hidden;margin-bottom:8px}.podc .pbar i{display:block;height:100%;background:var(--pc)}
+  .podc .pr{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--mut)}.podc .pr b{color:var(--txt)}
+  a.frl{color:var(--acc);text-decoration:underline;cursor:pointer;font-weight:800}a.frl:hover{opacity:.75}.frc .frm{font-size:15px}.frc small a.frl{font-weight:700}
 </style>
 <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("theme")||"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
@@ -152,7 +180,7 @@
 </div>
 <div class="win" id="win"></div>
 
-<div class="tabs"><button class="on" data-tab="1">Solved Tickets</button><button data-tab="2">Owner vs Assisted</button><button data-tab="3">Reopened Tickets</button></div>
+<div class="tabs"><button class="on" data-tab="1">Solved Tickets</button><button data-tab="2">Owner vs Assisted</button><button data-tab="3">Reopened Tickets</button><button data-tab="4">First Response</button><button data-tab="5">FR Live Tracker</button><button data-tab="6">Resolution Time</button></div>
 <div id="tab1">
 <div class="tools">
   <label>Week <select id="weekSel"><option value="">All weeks</option></select></label>
@@ -257,6 +285,66 @@
     <div class="card sec"><h2>Notes</h2><ul class="notes" id="notes3"></ul></div>
   </div>
   <div style="text-align:center;margin-top:8px"><button id="moreBtn3" style="color:var(--mut);font-size:12px">Show validation list &amp; notes</button></div>
+</div>
+
+<div id="tab4" style="display:none">
+  <div class="tools">
+    <label>Week <select id="weekSel4"><option value="">All weeks</option></select></label>
+    <span>POD</span><div class="seg" id="podSeg4"></div>
+    <span class="sub" id="frGoal"></span>
+  </div>
+  <div id="err4" class="err"></div>
+  <div class="frstrip" id="strip4"></div>
+  <div class="frk" id="kpis4"></div>
+  <div class="card sec"><h2>Average first response time by week (HH:MM:SS) <span class="sp"></span></h2>
+    <div class="frlg" id="frLeg"></div><svg id="frChart" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="card sec"><h2>Weekly missed first responses <span class="sp"></span><button data-exp="wk4">Export CSV</button></h2>
+    <p class="hint">Main figure = average first response time (HH:MM:SS). Small link = number of missed first responses (click it for the ticket list). Weeks are by ticket End Time, same as the other tabs.</p><div class="wrap"><table id="wk4"></table></div></div>
+  <div class="card sec"><h2>POD scorecard <span class="sp"></span><button data-exp="pod4">Export CSV</button></h2><div class="wrap"><table id="pod4"></table></div></div>
+  <div id="more4" style="display:none">
+    <div class="card sec"><h2>Validation checks</h2><div class="wrap"><table id="checks4"></table></div></div>
+    <div class="card sec"><h2>Notes</h2><ul class="notes" id="notes4"></ul></div>
+  </div>
+  <div style="text-align:center;margin-top:8px"><button id="moreBtn4" style="color:var(--mut);font-size:12px">Show validation &amp; notes</button></div>
+</div>
+
+<div id="tab6" style="display:none">
+  <div class="tools">
+    <label>Week <select id="weekSel6"><option value="">All weeks</option></select></label>
+    <span>POD</span><div class="seg" id="podSeg6"></div>
+    <span class="sub" id="frGoal6"></span>
+  </div>
+  <div id="err6" class="err"></div>
+  <div class="frstrip" id="strip6"></div>
+  <div class="frk" id="kpis6"></div>
+  <div class="card sec"><h2>Average resolution time by week (HH:MM:SS) <span class="sp"></span></h2>
+    <div class="frlg" id="frLeg6"></div><svg id="frChart6" viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="card sec"><h2>Weekly resolution misses <span class="sp"></span><button data-exp="wk6">Export CSV</button></h2>
+    <p class="hint">Main figure = average resolution time (HH:MM:SS). Small link = tickets resolved later than their target (click it for the ticket list). Weeks are by ticket End Time, same as the other tabs.</p><div class="wrap"><table id="wk6"></table></div></div>
+  <div class="card sec"><h2>POD scorecard <span class="sp"></span><button data-exp="pod6">Export CSV</button></h2><div class="wrap"><table id="pod6"></table></div></div>
+  <div id="more6" style="display:none">
+    <div class="card sec"><h2>Validation checks</h2><div class="wrap"><table id="checks6"></table></div></div>
+    <div class="card sec"><h2>Notes</h2><ul class="notes" id="notes6"></ul></div>
+  </div>
+  <div style="text-align:center;margin-top:8px"><button id="moreBtn6" style="color:var(--mut);font-size:12px">Show validation &amp; notes</button></div>
+</div>
+
+<div id="tab5" style="display:none">
+  <div class="tools">
+    <span class="livedot"></span><b>LIVE</b> <span class="sub" id="liveUp"></span>
+    <span>Bucket</span><div class="seg" id="bkSeg5"></div>
+    <input id="q5" placeholder="Search case / owner / account…" style="min-width:210px">
+  </div>
+  <div class="frstrip" id="win5"></div>
+  <div id="err5" class="err"></div>
+  <div class="frk" id="kpis5"></div>
+  <div class="card sec"><h2>POD focus <span class="sp"></span><span class="sub">Click a POD to filter both tables (click again to clear)</span></h2><div class="frpods" id="pods5"></div></div>
+  <div class="card sec"><h2>Going to breach — due in the next 2 hours <span id="n5s" class="sub"></span><span class="sp"></span><button data-exp="soon5">Export CSV</button></h2>
+    <p class="hint">Open tickets still waiting for a first response. Sorted by time left; countdown ticks live.</p><div class="wrap tall"><table id="soon5"></table></div></div>
+  <div class="card sec"><h2>Breached in the last 7 days <span id="n5b" class="sub"></span><span class="sp"></span><button data-exp="br5">Export CSV</button></h2>
+    <p class="hint">Open tickets whose First Response was not sent by the due time. "No response yet" keeps counting up; "Responded late" shows how late the response was.</p><div class="wrap tall"><table id="br5"></table></div></div>
+  <div style="text-align:center;margin-top:8px"><button id="moreBtn5" style="color:var(--mut);font-size:12px">Show notes</button></div>
+  <div id="more5" style="display:none"><div class="card sec"><h2>Notes</h2><ul class="notes" id="notes5"></ul></div></div>
 </div>
 
 <div id="tip"></div>
@@ -553,14 +641,17 @@ function render2(){
   $("notes2").innerHTML=d.notes.map(x=>`<li>${esc(x)}</li>`).join("");
   enhance2();
 }
-function reloadActive(force){if(S.tab===2)loadTab2(force);else if(S.tab===3)loadTab3(force)}
+function reloadActive(force){if(S.tab===2)loadTab2(force);else if(S.tab===3)loadTab3(force);else if(S.tab===4)loadTab4(force);else if(S.tab===5)loadTab5(true);else if(S.tab===6)loadTab6(force)}
 function setTab(t){
   S.tab=t;
   document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",+b.dataset.tab===t));
-  $("tab1").style.display=t===1?"":"none";$("tab2").style.display=t===2?"":"none";$("tab3").style.display=t===3?"":"none";
-  $("ttl").textContent=["","Section 1 · Solved Tickets","Section 2 · Owner vs Assisted","Section 3 · Reopened Tickets"][t];
+  $("tab1").style.display=t===1?"":"none";$("tab2").style.display=t===2?"":"none";$("tab3").style.display=t===3?"":"none";$("tab4").style.display=t===4?"":"none";$("tab5").style.display=t===5?"":"none";$("tab6").style.display=t===6?"":"none";[$("start").parentElement,$("end").parentElement,$("apply"),$("reset"),$("win")].forEach(x=>x.style.display=t===5?"none":"");
+  $("ttl").textContent=["","Section 1 · Solved Tickets","Section 2 · Owner vs Assisted","Section 3 · Reopened Tickets","Section 4 · First Response","Section 5 · FR Live Tracker","Section 6 · Resolution Time"][t];
   if(t===2){if(S2.data)render2();else loadTab2(false)}
   if(t===3){if(S3.data)render3();else loadTab3(false)}
+  if(t===4){if(S4.data)render4();else loadTab4(false)}
+  if(t===5){if(S5.data)render5();loadTab5(false)}
+  if(t===6){if(S6.data)render6();else loadTab6(false)}
 }
 document.querySelector(".tabs").onclick=ev=>{const b=ev.target.closest("button");if(b)setTab(+b.dataset.tab)};
 $("weekSel2").onchange=ev=>{S.week=ev.target.value===""?null:+ev.target.value;render()};
@@ -684,6 +775,212 @@ $("q3").oninput=ev=>{S3.q=ev.target.value.trim().toLowerCase();render3()};
 $("weekly3").onclick=ev=>{const tr=ev.target.closest("tbody tr");if(!tr)return;const i=+tr.dataset.w;S.week=S.week===i?null:i;render()};
 $("eng3").onclick=ev=>{const h=ev.target.closest("th.s3");if(!h)return;const k=h.dataset.k;S3.sort=S3.sort.k===k?{k,d:-S3.sort.d}:{k,d:(k==="name"||k==="pod")?1:-1};render3()};
 $("moreBtn3").onclick=()=>{const m=$("more3"),sh=m.style.display==="none";m.style.display=sh?"":"none";$("moreBtn3").textContent=sh?"Hide validation list & notes":"Show validation list & notes"};
+
+const why5=t=>t.sev==null?"No severity":(t.sev===1||t.sev===2)&&t.impact==null?"No impact % (Sev"+t.sev+")":t.sev===1?"Sev1 below 50% impact":"Not in any definition";
+/* ================= Tab 4: First Response ================= */
+const S4={data:null,week:null,pod:""};
+const BK=[["crit","CritSit · Sev1/2 ≥50%","Excl. Customer Scope","#ff6b8b"],["sev2","Sev2 · <50%","Excl. Customer Scope","#ff9f43"],["sev3","Non-CritSit · Sev3","Excl. Customer Scope","#5b8cff"],["cust","Customer Sev1–4 · GreyOrange Sev4","Customer scope Sev1–4 + GreyOrange scope Sev4","#b36bff"]];
+async function loadTab4(force){
+  $("err4").textContent="";$("meta").textContent="Loading First Response milestones…";
+  const q=new URLSearchParams();
+  if(S.custom){if($("start").value)q.set("start",$("start").value);if($("end").value)q.set("end",$("end").value)}
+  if(force)q.set("refresh","true");
+  try{
+    const r=await fetch("/api/firstresponse?"+q,{cache:"no-store"});
+    if(!r.ok)throw new Error((await r.text()).slice(0,500));
+    S4.data=await r.json();$("meta").textContent="Last refreshed "+S4.data.generated_at.replace("T"," ");render4();
+  }catch(e){$("err4").textContent="Error: "+e.message;$("meta").textContent=""}
+}
+function agg4(ts){
+  const met=ts.filter(t=>t.outcome==="met").length,mis=ts.filter(t=>t.outcome==="missed").length,op=ts.filter(t=>t.outcome==="open").length;
+  const m=ts.map(t=>t.fr_min).filter(x=>x!=null).sort((a,b)=>a-b),tg={};ts.forEach(t=>{if(t.target)tg[t.target]=(tg[t.target]||0)+1});
+  const target=Object.keys(tg).sort((a,b)=>tg[b]-tg[a])[0];
+  return{total:ts.length,met,mis,op,avg:m.length?m.reduce((a,b)=>a+b,0)/m.length:null,med:m.length?m[Math.floor((m.length-1)/2)]:null,
+    p90:m.length?m[Math.min(m.length-1,Math.floor(m.length*.9))]:null,target:target?+target:null};
+}
+const mins4=x=>{if(x==null)return "–";const t=Math.round(x*60),p=v=>String(v).padStart(2,"0");return p(Math.floor(t/3600))+":"+p(Math.floor(t%3600/60))+":"+p(t%60)};
+const tone4=a=>a.avg==null?"na":!a.target?"na":a.avg<=a.target?"g":a.avg<=a.target*1.25?"a":"r";
+const link4=(c,b,w,p)=>c?`<a class="frl" data-b="${b}" data-w="${w}" data-p="${esc(p)}">${n(c)}</a>`:`<span class="sub">0</span>`;
+function cell4(a,b,w,p){return `<div class="frc ${tone4(a)}"><span class="frm">${mins4(a.avg)}</span><small>${a.mis?link4(a.mis,b,w,p)+" missed":"0 missed"}</small></div>`}
+function drill4(b,w,p){
+  const d=S4.data,W=d.weeks;
+  const ts=d.tickets.filter(t=>(b==="none"?t.bucket==="none":t.outcome==="missed"&&(b==="all"?t.bucket!=="none":t.bucket===b))&&(w==="all"||(t.date>=W[+w].from&&t.date<=W[+w].to))&&(!p||t.pod===p));
+  const bl=Object.fromEntries(BK.map(x=>[x[0],x[1]]));
+  $("mbox").innerHTML=`<div class="mh"><div><h3>${b==="none"?"Tickets outside the 4 definitions":"Missed first responses — "+(b==="all"?"all buckets":esc(bl[b]))}</h3><span class="sub">${w==="all"?"All weeks":esc(weekLabel(W[+w]))}${p?" · "+esc(p):""} · ${ts.length} tickets</span></div><div><button data-exp="dd4">Export CSV</button> <button id="mclose">Close</button></div></div>
+   <div class="wrap"><table id="dd4"><thead><tr><th>Case</th><th>Account</th><th>Owner</th><th>POD</th><th>Created (IST)</th><th>End date</th><th>${b==="none"?"Reason":"Bucket"}</th><th>Sev</th><th>Impact %</th><th>Technical Impacted Area</th><th>Target</th><th>FR time</th></tr></thead><tbody>`+
+   ts.map(t=>`<tr><td>${esc(t.case)}</td><td>${esc(t.account)}</td><td>${esc(t.owner)}</td><td style="color:${podc(t.pod)}">${esc(t.pod)}</td><td>${esc(t.created)}</td><td>${esc(t.end)}</td><td>${esc(b==="none"?why5(t):(bl[t.bucket]||""))}</td><td>${t.sev??""}</td><td>${t.impact??""}</td><td>${esc(t.tia)}</td><td>${t.target?mins4(t.target):""}</td><td class="b">${t.fr_min==null?"no response":mins4(t.fr_min)}</td></tr>`).join("")+
+   `</tbody></table></div>`;
+  $("modal").style.display="flex";
+}
+function render4(){
+  const d=S4.data,W=d.weeks,sw=S4.week;
+  $("weekSel4").innerHTML='<option value="">All weeks</option>'+W.map((w,i)=>`<option value="${i}" ${sw===i?"selected":""}>${esc(weekLabel(w))}</option>`).join("");
+  $("podSeg4").innerHTML=`<button data-p="" class="${S4.pod?"":"on"}">All</button>`+d.pods.map(p=>`<button data-p="${esc(p)}" class="${S4.pod===p?"on":""}">${esc(p)}</button>`).join("");
+  $("frGoal").textContent="Colour: green = avg within target · amber = up to 25% over · red = more";
+  const inW=(t,w)=>t.date>=w.from&&t.date<=w.to,base=d.tickets.filter(t=>!S4.pod||t.pod===S4.pod),scoped=sw==null?base:base.filter(t=>inW(t,W[sw]));
+  const ofB=(k,ts)=>agg4(ts.filter(t=>t.bucket===k)),wsel=sw==null?"all":sw;
+  const all=agg4(scoped),cls=scoped.filter(t=>t.bucket!=="none").length;
+  $("strip4").innerHTML=`<span><b>${n(scoped.length)}</b> solved tickets in scope${S4.pod||sw!=null?"":d.solved_tab_total!=null&&d.solved_tab_total===d.total?' <em class="okc">✓ matches Solved Tickets tab</em>':""}</span><span><b>${n(cls)}</b> in the 4 FR buckets</span><span><b>${scoped.length-cls?`<a class="frl" data-b="none" data-w="${wsel}" data-p="${esc(S4.pod)}">${n(scoped.length-cls)}</a>`:0}</b> outside the 4 definitions (click for list)</span><span><b>${n(all.mis)}</b> missed FR · <b>${n(all.met)}</b> met</span>`;
+  $("kpis4").innerHTML=BK.map(([k,l,sub,col])=>{
+    const a=ofB(k,scoped),tot=a.met+a.mis+a.op||1;
+    return `<div class="card frcard ${tone4(a)}" style="--bc:${col}"><div class="bl">${esc(l)}</div><div class="bs">${esc(sub)}</div>
+      <div class="big" style="font-size:34px">${mins4(a.avg)}</div><div class="bs">average first response (HH:MM:SS)${a.target?` · target ${mins4(a.target)}`:""}</div>
+      <div class="meter"><i class="m-met" style="width:${a.met/tot*100}%"></i><i class="m-mis" style="width:${a.mis/tot*100}%"></i><i class="m-op" style="width:${a.op/tot*100}%"></i></div>
+      <div class="row"><span><b>${n(a.total)}</b> tickets</span><span><b>${n(a.met)}</b> met</span><span><b>${link4(a.mis,k,wsel,S4.pod)}</b> missed</span><span><b>${n(a.op)}</b> open</span></div>
+      <div class="row"><span>Median <b>${mins4(a.med)}</b></span><span>90th pct <b>${mins4(a.p90)}</b></span></div></div>`}).join("");
+  // chart: average FR minutes per week
+  const series=BK.map(b=>W.map(w=>ofB(b[0],base.filter(t=>inW(t,w))))),mx=Math.max(10,...series.flat().map(a=>a.avg||0)),top=Math.ceil(mx/10)*10;
+  const X0=52,X1=880,Y0=14,Y1=222,xs=i=>W.length>1?X0+(X1-X0)*i/(W.length-1):(X0+X1)/2,ys=v=>Y1-(Y1-Y0)*v/top;
+  let g="";for(let i=0;i<=4;i++){const v=top*i/4;g+=`<line x1="${X0}" x2="${X1}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--line)"/><text x="${X0-8}" y="${ys(v)+4}" text-anchor="end">${mins4(v)}</text>`}
+  W.forEach((w,i)=>g+=`<text x="${xs(i)}" y="246" text-anchor="middle">${esc(fmtMD(w.from))}</text>`);
+  BK.forEach((b,bi)=>{const pts=series[bi].map((a,i)=>a.avg==null?null:[xs(i),ys(a.avg),a]).filter(Boolean);
+    if(pts.length>1)g+=`<polyline fill="none" stroke="${b[3]}" stroke-width="2.5" points="${pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}"/>`;
+    pts.forEach(p=>g+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="${b[3]}"><title>${esc(b[1])} — avg ${mins4(p[2].avg)} · ${p[2].mis} missed of ${p[2].total}</title></circle>`)});
+  $("frChart").innerHTML=g;$("frLeg").innerHTML=BK.map(b=>`<span><i style="background:${b[3]}"></i>${esc(b[1])}</span>`).join("");
+  // weekly missed (hyperlinks)
+  const wr=W.map((w,i)=>({w,i,ts:base.filter(t=>inW(t,w))})).filter(r=>sw==null||r.i===sw);
+  $("wk4").innerHTML=`<thead><tr><th>Week</th>${BK.map(b=>`<th style="color:${b[3]}">${esc(b[1])}</th>`).join("")}<th>Total missed</th><th>Solved tickets</th></tr></thead><tbody>`+
+    wr.map(r=>`<tr class="${sw===r.i?"on":""}"><td>${esc(weekLabel(r.w))}</td>${BK.map(b=>`<td>${cell4(ofB(b[0],r.ts),b[0],r.i,S4.pod)}</td>`).join("")}<td class="b">${link4(agg4(r.ts.filter(t=>t.bucket!=="none")).mis,"all",r.i,S4.pod)}</td><td>${n(r.ts.length)}</td></tr>`).join("")+
+    `</tbody>`+(sw!=null?"":`<tfoot><tr class="tot"><td>All weeks</td>${BK.map(b=>`<td>${cell4(ofB(b[0],base),b[0],"all",S4.pod)}</td>`).join("")}<td>${link4(agg4(base.filter(t=>t.bucket!=="none")).mis,"all","all",S4.pod)}</td><td>${n(base.length)}</td></tr></tfoot>`);
+  // POD scorecard
+  const pods=d.pods.filter(p=>!S4.pod||p===S4.pod);
+  $("pod4").innerHTML=`<thead><tr><th>POD</th>${BK.map(b=>`<th style="color:${b[3]}">${esc(b[1])}</th>`).join("")}<th>Total missed</th><th>Solved tickets</th></tr></thead><tbody>`+
+    pods.map(p=>{const ts=scoped.filter(t=>t.pod===p);return `<tr><td class="b" style="color:${podc(p)}">${esc(p)}</td>${BK.map(b=>`<td>${cell4(ofB(b[0],ts),b[0],wsel,p)}</td>`).join("")}<td class="b">${link4(agg4(ts.filter(t=>t.bucket!=="none")).mis,"all",wsel,p)}</td><td>${n(ts.length)}</td></tr>`}).join("")+
+    `</tbody><tfoot><tr class="tot"><td>All</td>${BK.map(b=>`<td>${cell4(ofB(b[0],scoped),b[0],wsel,S4.pod)}</td>`).join("")}<td>${link4(agg4(scoped.filter(t=>t.bucket!=="none")).mis,"all",wsel,S4.pod)}</td><td>${n(scoped.length)}</td></tr></tfoot>`;
+  $("checks4").innerHTML=`<thead><tr><th>Check</th><th>Result</th><th>Detail</th></tr></thead><tbody>`+d.checks.map(c=>`<tr><td>${esc(c.name)}</td><td><span class="frc ${c.ok?"g":"a"}">${c.ok?"PASS":"NOTE"}</span></td><td>${esc(c.detail)}</td></tr>`).join("")+"</tbody>";
+  $("notes4").innerHTML=d.notes.map(x=>`<li>${esc(x)}</li>`).join("");
+}
+$("tab4").addEventListener("click",ev=>{const a=ev.target.closest("a.frl");if(a)drill4(a.dataset.b,a.dataset.w,a.dataset.p)});
+$("weekSel4").onchange=ev=>{S4.week=ev.target.value===""?null:+ev.target.value;render4()};
+$("podSeg4").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;S4.pod=b.dataset.p;render4()};
+$("moreBtn4").onclick=()=>{const m=$("more4"),sh=m.style.display==="none";m.style.display=sh?"":"none";$("moreBtn4").textContent=sh?"Hide validation & notes":"Show validation & notes"};
+
+/* ================= Tab 5: FR Live Tracker ================= */
+const S5={data:null,bk:"",q:"",pod:"",timer:null};
+async function loadTab5(force){
+  $("err5").textContent="";
+  try{
+    const r=await fetch("/api/fr-live"+(force?"?refresh=true":""),{cache:"no-store"});
+    if(!r.ok)throw new Error((await r.text()).slice(0,500));
+    S5.data=await r.json();S5.off=S5.data.now_ms-Date.now();$("meta").textContent="Last refreshed "+S5.data.generated_at.replace("T"," ");
+    if(S.tab===5)render5();
+  }catch(e){$("err5").textContent="Error: "+e.message;$("meta").textContent=""}
+}
+const hms5=s=>{s=Math.max(0,Math.round(s));const d=Math.floor(s/86400),p=v=>String(v).padStart(2,"0");return(d?d+"d ":"")+p(Math.floor(s%86400/3600))+":"+p(Math.floor(s%3600/60))+":"+p(s%60)};
+const nowMs5=()=>Date.now()+(S5.off||0);
+function cd5(t){
+  if(t.state==="soon"){const s=(t.due_ms-nowMs5())/1000;return s<=0?`<span class="cd r">Overdue ${hms5(-s)}</span>`:`<span class="cd ${s<900?"r":"a"}" data-due="${t.due_ms}" data-k="soon">${hms5(s)}</span>`}
+  if(t.state==="nores")return `<span class="cd r" data-due="${t.due_ms}" data-k="over">+${hms5((nowMs5()-t.due_ms)/1000)}</span>`;
+  return `<span class="cd a">+${hms5(t.late_s)}</span>`;
+}
+function tick5(){document.querySelectorAll("#tab5 [data-due]").forEach(el=>{const d=+el.dataset.due,s=(d-nowMs5())/1000;
+  if(el.dataset.k==="soon"){if(s<=0){el.className="cd r";el.textContent="Overdue "+hms5(-s)}else{el.className="cd "+(s<900?"r":"a");el.textContent=hms5(s)}}else el.textContent="+"+hms5(-s)});
+  const u=$("liveUp");if(u&&S5.data)u.textContent="updated "+S5.data.generated_at.slice(11)+" IST · auto-refresh every minute"}
+function render5(){
+  const d=S5.data,bl=Object.fromEntries(d.buckets.map(b=>[b.key,b.label]));
+  const f5=ms=>new Date(ms).toLocaleString("en-GB",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit",hour12:false}),nw=nowMs5();
+  $("win5").innerHTML=`<span><b>Breached:</b> FR due between ${f5(nw-7*864e5)} and now</span><span><b>Going to breach:</b> FR due between now and ${f5(nw+2*36e5)}</span><span>IST · rolling, independent of the date / week / POD filters on the other tabs</span>`;
+  $("bkSeg5").innerHTML=`<button data-b="" class="${S5.bk?"":"on"}">All</button>`+d.buckets.filter(b=>b.key!=="none").map(b=>`<button data-b="${b.key}" class="${S5.bk===b.key?"on":""}">${esc(b.label.split(" ·")[0])}</button>`).join("");
+  const q=S5.q,pre=d.tickets.filter(t=>(!S5.bk||t.bucket===S5.bk)&&(!q||(t.case+" "+t.owner+" "+t.account).toLowerCase().includes(q))),ts=pre.filter(t=>!S5.pod||t.pod===S5.pod);
+  const soon=ts.filter(t=>t.state==="soon").sort((a,b)=>a.due_ms-b.due_ms),br=ts.filter(t=>t.state!=="soon").sort((a,b)=>b.due_ms-a.due_ms);
+  const nr=br.filter(t=>t.state==="nores").length,lt=br.length-nr;
+  $("kpis5").innerHTML=[["Due in next 2 h",soon.length,"#ff9f43","a"],["Breached · no response yet",nr,"#ff6b8b","r"],["Breached · responded late",lt,"#b36bff","a"],["Total breached · last 7 days",br.length,"#5b8cff","na"]]
+   .map(([l,v,c,t])=>`<div class="card frcard ${t}" style="--bc:${c}"><div class="bl">${l}</div><div class="big">${n(v)}</div><div class="bs">tickets</div></div>`).join("");
+  const pl=[...new Set([...d.tickets.map(t=>t.pod),"POD-1","POD-2","POD-3","POD-4"])].sort((a,b)=>(a==="Non-roster")-(b==="Non-roster")||a.localeCompare(b)),att=x=>x.filter(t=>t.state!=="late").length,mxa=Math.max(1,...pl.map(p=>att(pre.filter(t=>t.pod===p))));
+  $("pods5").innerHTML=pl.map(p=>{const x=pre.filter(t=>t.pod===p),so=x.filter(t=>t.state==="soon").length,nr=x.filter(t=>t.state==="nores").length,lt=x.filter(t=>t.state==="late").length,a=so+nr,old=x.filter(t=>t.state==="nores").reduce((m,t)=>Math.min(m,t.due_ms),Infinity);
+    return `<div class="podc ${S5.pod===p?"on":""} ${a===0?"ok":nr>0?"bad":"warn"}" data-p="${esc(p)}" style="--pc:${p==="Non-roster"?"#9a9da6":podc(p)}"><div class="pn">${esc(p)}</div><div class="pb">${a}<small> need action</small></div>
+      <div class="pbar"><i style="width:${a/mxa*100}%"></i></div>
+      <div class="pr"><span><b>${so}</b> due ≤2h</span><span><b>${nr}</b> no response</span><span><b>${lt}</b> late</span></div>
+      <div class="pr"><span>Longest wait <b>${old===Infinity?"–":'<span data-due="'+old+'" data-k="over">+'+hms5((nowMs5()-old)/1000)+"</span>"}</b></span></div></div>`}).join("");
+  const link=t=>`<a class="frl" href="${esc(d.link_base)}/lightning/r/Case/${esc(t.id)}/view" target="_blank" rel="noopener">${esc(t.case)}</a>`;
+  const row=(t,extra)=>`<tr><td>${link(t)}</td><td>${esc(t.account)}</td><td>${esc(t.owner)}</td><td style="color:${podc(t.pod)}">${esc(t.pod)}</td><td>${esc(bl[t.bucket]||"")}</td><td>${t.sev??""}</td><td>${esc(t.status)}</td><td>${esc(t.start)}</td><td>${esc(t.due)}</td>${extra}</tr>`;
+  const head=x=>`<thead><tr><th>Case</th><th>Account</th><th>Owner</th><th>POD</th><th>Bucket</th><th>Sev</th><th>Status</th><th>FR started (IST)</th><th>FR due (IST)</th>${x}</tr></thead>`;
+  $("soon5").innerHTML=head("<th>Time left</th>")+"<tbody>"+(soon.map(t=>row(t,`<td class="b">${cd5(t)}</td>`)).join("")||'<tr><td colspan="10" class="sub">Nothing due in the next 2 hours.</td></tr>')+"</tbody>";
+  $("br5").innerHTML=head("<th>State</th><th>Overdue / late by</th>")+"<tbody>"+(br.map(t=>row(t,`<td>${t.state==="nores"?'<span class="frtag">No response yet</span>':'<span class="frtag" style="background:var(--amb);color:var(--ambt)">Responded late</span>'}</td><td class="b">${cd5(t)}</td>`)).join("")||'<tr><td colspan="11" class="sub">No breaches in the last 7 days.</td></tr>')+"</tbody>";
+  $("n5s").textContent=`(${soon.length})`;$("n5b").textContent=`(${br.length})`;$("notes5").innerHTML=d.notes.map(x=>`<li>${esc(x)}</li>`).join("");tick5();
+}
+$("bkSeg5").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;S5.bk=b.dataset.b;render5()};
+$("pods5").onclick=ev=>{const c=ev.target.closest(".podc");if(!c)return;S5.pod=S5.pod===c.dataset.p?"":c.dataset.p;render5()};
+$("q5").oninput=ev=>{S5.q=ev.target.value.trim().toLowerCase();render5()};
+$("moreBtn5").onclick=()=>{const m=$("more5"),sh=m.style.display==="none";m.style.display=sh?"":"none";$("moreBtn5").textContent=sh?"Hide notes":"Show notes"};
+setInterval(()=>{if(S.tab===5&&S5.data)tick5()},1000);
+setInterval(()=>{if(S.tab===5&&document.visibilityState==="visible")loadTab5(false)},60000);
+
+/* ================= Tab 6: Resolution time ================= */
+const S6={data:null,week:null,pod:""};
+async function loadTab6(force){
+  $("err6").textContent="";$("meta").textContent="Loading Resolution milestones…";
+  const q=new URLSearchParams();
+  if(S.custom){if($("start").value)q.set("start",$("start").value);if($("end").value)q.set("end",$("end").value)}
+  if(force)q.set("refresh","true");
+  try{
+    const r=await fetch("/api/resolution?"+q,{cache:"no-store"});
+    if(!r.ok)throw new Error((await r.text()).slice(0,500));
+    S6.data=await r.json();$("meta").textContent="Last refreshed "+S6.data.generated_at.replace("T"," ");render6();
+  }catch(e){$("err6").textContent="Error: "+e.message;$("meta").textContent=""}
+}
+function agg6(ts){
+  const met=ts.filter(t=>t.outcome==="met").length,mis=ts.filter(t=>t.outcome==="missed").length,op=ts.filter(t=>t.outcome==="open").length;
+  const m=ts.map(t=>t.fr_min).filter(x=>x!=null).sort((a,b)=>a-b),tg={};ts.forEach(t=>{if(t.target)tg[t.target]=(tg[t.target]||0)+1});
+  const target=Object.keys(tg).sort((a,b)=>tg[b]-tg[a])[0];
+  return{total:ts.length,met,mis,op,avg:m.length?m.reduce((a,b)=>a+b,0)/m.length:null,med:m.length?m[Math.floor((m.length-1)/2)]:null,
+    p90:m.length?m[Math.min(m.length-1,Math.floor(m.length*.9))]:null,target:target?+target:null};
+}
+const tone6=a=>a.avg==null?"na":!a.target?"na":a.avg<=a.target?"g":a.avg<=a.target*1.25?"a":"r";
+const link6=(c,b,w,p)=>c?`<a class="frl" data-b="${b}" data-w="${w}" data-p="${esc(p)}">${n(c)}</a>`:`<span class="sub">0</span>`;
+function cell6(a,b,w,p){return `<div class="frc ${tone6(a)}"><span class="frm">${mins4(a.avg)}</span><small>${a.mis?link6(a.mis,b,w,p)+" missed":"0 missed"}</small></div>`}
+function drill6(b,w,p){
+  const d=S6.data,W=d.weeks;
+  const ts=d.tickets.filter(t=>(b==="none"?t.bucket==="none":t.outcome==="missed"&&(b==="all"?t.bucket!=="none":t.bucket===b))&&(w==="all"||(t.date>=W[+w].from&&t.date<=W[+w].to))&&(!p||t.pod===p));
+  const bl=Object.fromEntries(BK.map(x=>[x[0],x[1]]));
+  $("mbox").innerHTML=`<div class="mh"><div><h3>${b==="none"?"Tickets outside the 4 definitions":"Resolution misses — "+(b==="all"?"all buckets":esc(bl[b]))}</h3><span class="sub">${w==="all"?"All weeks":esc(weekLabel(W[+w]))}${p?" · "+esc(p):""} · ${ts.length} tickets</span></div><div><button data-exp="dd6">Export CSV</button> <button id="mclose">Close</button></div></div>
+   <div class="wrap"><table id="dd6"><thead><tr><th>Case</th><th>Account</th><th>Owner</th><th>POD</th><th>Created (IST)</th><th>End date</th><th>${b==="none"?"Reason":"Bucket"}</th><th>Sev</th><th>Impact %</th><th>Technical Impacted Area</th><th>Target</th><th>Resolution time</th></tr></thead><tbody>`+
+   ts.map(t=>`<tr><td>${esc(t.case)}</td><td>${esc(t.account)}</td><td>${esc(t.owner)}</td><td style="color:${podc(t.pod)}">${esc(t.pod)}</td><td>${esc(t.created)}</td><td>${esc(t.end)}</td><td>${esc(b==="none"?why5(t):(bl[t.bucket]||""))}</td><td>${t.sev??""}</td><td>${t.impact??""}</td><td>${esc(t.tia)}</td><td>${t.target?mins4(t.target):""}</td><td class="b">${t.fr_min==null?"not resolved":mins4(t.fr_min)}</td></tr>`).join("")+
+   `</tbody></table></div>`;
+  $("modal").style.display="flex";
+}
+function render6(){
+  const d=S6.data,W=d.weeks,sw=S6.week;
+  $("weekSel6").innerHTML='<option value="">All weeks</option>'+W.map((w,i)=>`<option value="${i}" ${sw===i?"selected":""}>${esc(weekLabel(w))}</option>`).join("");
+  $("podSeg6").innerHTML=`<button data-p="" class="${S6.pod?"":"on"}">All</button>`+d.pods.map(p=>`<button data-p="${esc(p)}" class="${S6.pod===p?"on":""}">${esc(p)}</button>`).join("");
+  $("frGoal6").textContent="Colour: green = avg within target · amber = up to 25% over · red = more";
+  const inW=(t,w)=>t.date>=w.from&&t.date<=w.to,base=d.tickets.filter(t=>!S6.pod||t.pod===S6.pod),scoped=sw==null?base:base.filter(t=>inW(t,W[sw]));
+  const ofB=(k,ts)=>agg6(ts.filter(t=>t.bucket===k)),wsel=sw==null?"all":sw;
+  const all=agg6(scoped),cls=scoped.filter(t=>t.bucket!=="none").length;
+  $("strip6").innerHTML=`<span><b>${n(scoped.length)}</b> solved tickets in scope${S6.pod||sw!=null?"":d.solved_tab_total!=null&&d.solved_tab_total===d.total?' <em class="okc">✓ matches Solved Tickets tab</em>':""}</span><span><b>${n(cls)}</b> in the 4 FR buckets</span><span><b>${scoped.length-cls?`<a class="frl" data-b="none" data-w="${wsel}" data-p="${esc(S6.pod)}">${n(scoped.length-cls)}</a>`:0}</b> outside the 4 definitions (click for list)</span><span><b>${n(all.mis)}</b> missed target · <b>${n(all.met)}</b> met</span>`;
+  $("kpis6").innerHTML=BK.map(([k,l,sub,col])=>{
+    const a=ofB(k,scoped),tot=a.met+a.mis+a.op||1;
+    return `<div class="card frcard ${tone6(a)}" style="--bc:${col}"><div class="bl">${esc(l)}</div><div class="bs">${esc(sub)}</div>
+      <div class="big" style="font-size:34px">${mins4(a.avg)}</div><div class="bs">average resolution (HH:MM:SS)${a.target?` · target ${mins4(a.target)}`:""}</div>
+      <div class="meter"><i class="m-met" style="width:${a.met/tot*100}%"></i><i class="m-mis" style="width:${a.mis/tot*100}%"></i><i class="m-op" style="width:${a.op/tot*100}%"></i></div>
+      <div class="row"><span><b>${n(a.total)}</b> tickets</span><span><b>${n(a.met)}</b> met</span><span><b>${link6(a.mis,k,wsel,S6.pod)}</b> missed</span><span><b>${n(a.op)}</b> open</span></div>
+      <div class="row"><span>Median <b>${mins4(a.med)}</b></span><span>90th pct <b>${mins4(a.p90)}</b></span></div></div>`}).join("");
+  // chart: average FR minutes per week
+  const series=BK.map(b=>W.map(w=>ofB(b[0],base.filter(t=>inW(t,w))))),mx=Math.max(10,...series.flat().map(a=>a.avg||0)),top=Math.ceil(mx/10)*10;
+  const X0=52,X1=880,Y0=14,Y1=222,xs=i=>W.length>1?X0+(X1-X0)*i/(W.length-1):(X0+X1)/2,ys=v=>Y1-(Y1-Y0)*v/top;
+  let g="";for(let i=0;i<=4;i++){const v=top*i/4;g+=`<line x1="${X0}" x2="${X1}" y1="${ys(v)}" y2="${ys(v)}" stroke="var(--line)"/><text x="${X0-8}" y="${ys(v)+4}" text-anchor="end">${mins4(v)}</text>`}
+  W.forEach((w,i)=>g+=`<text x="${xs(i)}" y="246" text-anchor="middle">${esc(fmtMD(w.from))}</text>`);
+  BK.forEach((b,bi)=>{const pts=series[bi].map((a,i)=>a.avg==null?null:[xs(i),ys(a.avg),a]).filter(Boolean);
+    if(pts.length>1)g+=`<polyline fill="none" stroke="${b[3]}" stroke-width="2.5" points="${pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ")}"/>`;
+    pts.forEach(p=>g+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="${b[3]}"><title>${esc(b[1])} — avg ${mins4(p[2].avg)} · ${p[2].mis} missed of ${p[2].total}</title></circle>`)});
+  $("frChart6").innerHTML=g;$("frLeg6").innerHTML=BK.map(b=>`<span><i style="background:${b[3]}"></i>${esc(b[1])}</span>`).join("");
+  // weekly missed (hyperlinks)
+  const wr=W.map((w,i)=>({w,i,ts:base.filter(t=>inW(t,w))})).filter(r=>sw==null||r.i===sw);
+  $("wk6").innerHTML=`<thead><tr><th>Week</th>${BK.map(b=>`<th style="color:${b[3]}">${esc(b[1])}</th>`).join("")}<th>Total missed</th><th>Solved tickets</th></tr></thead><tbody>`+
+    wr.map(r=>`<tr class="${sw===r.i?"on":""}"><td>${esc(weekLabel(r.w))}</td>${BK.map(b=>`<td>${cell6(ofB(b[0],r.ts),b[0],r.i,S6.pod)}</td>`).join("")}<td class="b">${link6(agg6(r.ts.filter(t=>t.bucket!=="none")).mis,"all",r.i,S6.pod)}</td><td>${n(r.ts.length)}</td></tr>`).join("")+
+    `</tbody>`+(sw!=null?"":`<tfoot><tr class="tot"><td>All weeks</td>${BK.map(b=>`<td>${cell6(ofB(b[0],base),b[0],"all",S6.pod)}</td>`).join("")}<td>${link6(agg6(base.filter(t=>t.bucket!=="none")).mis,"all","all",S6.pod)}</td><td>${n(base.length)}</td></tr></tfoot>`);
+  // POD scorecard
+  const pods=d.pods.filter(p=>!S6.pod||p===S6.pod);
+  $("pod6").innerHTML=`<thead><tr><th>POD</th>${BK.map(b=>`<th style="color:${b[3]}">${esc(b[1])}</th>`).join("")}<th>Total missed</th><th>Solved tickets</th></tr></thead><tbody>`+
+    pods.map(p=>{const ts=scoped.filter(t=>t.pod===p);return `<tr><td class="b" style="color:${podc(p)}">${esc(p)}</td>${BK.map(b=>`<td>${cell6(ofB(b[0],ts),b[0],wsel,p)}</td>`).join("")}<td class="b">${link6(agg6(ts.filter(t=>t.bucket!=="none")).mis,"all",wsel,p)}</td><td>${n(ts.length)}</td></tr>`}).join("")+
+    `</tbody><tfoot><tr class="tot"><td>All</td>${BK.map(b=>`<td>${cell6(ofB(b[0],scoped),b[0],wsel,S6.pod)}</td>`).join("")}<td>${link6(agg6(scoped.filter(t=>t.bucket!=="none")).mis,"all",wsel,S6.pod)}</td><td>${n(scoped.length)}</td></tr></tfoot>`;
+  $("checks6").innerHTML=`<thead><tr><th>Check</th><th>Result</th><th>Detail</th></tr></thead><tbody>`+d.checks.map(c=>`<tr><td>${esc(c.name)}</td><td><span class="frc ${c.ok?"g":"a"}">${c.ok?"PASS":"NOTE"}</span></td><td>${esc(c.detail)}</td></tr>`).join("")+"</tbody>";
+  $("notes6").innerHTML=d.notes.map(x=>`<li>${esc(x)}</li>`).join("");
+}
+$("tab6").addEventListener("click",ev=>{const a=ev.target.closest("a.frl");if(a)drill6(a.dataset.b,a.dataset.w,a.dataset.p)});
+$("weekSel6").onchange=ev=>{S6.week=ev.target.value===""?null:+ev.target.value;render6()};
+$("podSeg6").onclick=ev=>{const b=ev.target.closest("button");if(!b)return;S6.pod=b.dataset.p;render6()};
+$("moreBtn6").onclick=()=>{const m=$("more6"),sh=m.style.display==="none";m.style.display=sh?"":"none";$("moreBtn6").textContent=sh?"Hide validation & notes":"Show validation & notes"};
 
 /* ================= look & feel layer ================= */
 const PODC={"POD-1":"#5b8cff","POD-2":"#b36bff","POD-3":"#2fc4a5","POD-4":"#ff9f43"},PALETTE=["#5b8cff","#b36bff","#2fc4a5","#ff9f43","#ff6b8b","#46c2ff"];

@@ -18,6 +18,12 @@
       "values": [
         "Software"
       ]
+    },
+    {
+      "field": "RecordType.Name",
+      "values": [
+        "Ticket Form"
+      ]
     }
   ],
   "exclude": [
@@ -31,7 +37,7 @@
   "incident_types": [
     "Incident"
   ],
-  "filter_label": "Alerts · Hardware",
+  "filter_label": "Alerts \u00b7 Hardware",
   "timezone_offset_minutes": 330,
   "roster_file": "roster.csv",
   "cache_seconds": 280,
@@ -46,5 +52,67 @@
     "290174",
     "296871",
     "289751"
+  ],
+  "fr": {
+    "milestone": "First Response",
+    "fields": {
+      "severity": "SLA_Category__c",
+      "impact": "Impact_Percentage__c",
+      "tia": "Technical_Impacted_Area__c",
+      "resolution": "Resolution_Time_min__c"
+    },
+    "include": [
+      {
+        "field": "Category__c",
+        "values": [
+          "Software"
+        ]
+      }
+    ],
+    "crit_impact_pct": 50,
+    "customer_scope": [
+      "Customer SOP/Training Issue",
+      "None / Invalid Issue / No Issue Found",
+      "Customer Vendor Issue",
+      "PPS Strategy",
+      "More Info Required",
+      "Customer WMS Issue",
+      "Customer Network Issue"
+    ],
+    "target_minutes": {
+      "sev3": 120,
+      "cust": 120
+    },
+    "live_target_minutes": {
+      "1": 15,
+      "2": 15,
+      "3": 120,
+      "4": 120
+    },
+    "resolution_target_minutes": {
+      "crit": 60,
+      "sev2": 120,
+      "sev3": 1440,
+      "cust": 1440
+    }
+  },
+  "exclude_combo": [
+    {
+      "label": "Sev4 Feature Requests",
+      "all": [
+        {
+          "field": "SLA_Category__c",
+          "values": [
+            "Severity 4"
+          ]
+        },
+        {
+          "field": "Type",
+          "values": [
+            "Feature Request"
+          ]
+        }
+      ]
+    }
   ]
 }
